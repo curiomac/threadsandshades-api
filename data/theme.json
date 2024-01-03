@@ -1,0 +1,16 @@
+[
+  {
+    "mode": "0",
+    "primary_color": "#151b27",
+    "secondary_color": "#1f2741",
+    "primary_font_color": "#ffffff",
+    "secondary_font_color": "#ffffff77"
+  },
+  {
+    "mode": "1",
+    "primary_color": "#fff",
+    "secondary_color": "#fff",
+    "primary_font_color": "#000",
+    "secondary_font_color": "#gray"
+  }
+]
