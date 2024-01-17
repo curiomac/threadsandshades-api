@@ -1,21 +1,21 @@
-const vehicle = require('../data/vehicle.json');
-const Vehicle = require('../models/vehicleModel');
+const product = require('../data/product.json');
+const { Product } = require('../models/productModel');
 const dotenv = require('dotenv');
-const connectDatabase = require('../config/database')
+const connectDatabase = require('../config/database');
 
-dotenv.config({path: 'config/config.env'});
+dotenv.config({ path: 'config/config.env' });
 connectDatabase();
 
-const seedProducts = async ()=>{
-    try{
-    await Vehicle.deleteMany();
-    console.log('vehicles deleted')
-    await Vehicle.insertMany(vehicle);
-    console.log('All vehicles added')
-    }catch (error){
+const seedProduct = async () => {
+    try {
+        await Product.deleteMany();
+        console.log('Products deleted');
+        await Product.insertMany(product);
+        console.log('All products added');
+    } catch (error) {
         console.log(error.message);
     }
     process.exit();
-}
+};
 
-seedProducts();
+seedProduct();

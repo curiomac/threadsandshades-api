@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const { isAuthenticatedUser, authorizeRoles } = require('../middlewares/authenticate');
-const { getVehicles, getVehicle } = require('../controllers/vehicleController');
+const { getProducts, getProduct } = require('../controllers/productController');
 
-router.route('/vehicles').get(getVehicles);
-router.route('/vehicle/:id').get(getVehicle);
+router.route('/products').get(getProducts);
+router.route('/product/:id').get(getProduct);
 
 
 module.exports = router; 
