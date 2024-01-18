@@ -7,6 +7,7 @@ const path = require('path');
 const auth = require('./routes/auth');
 const theme = require('./routes/theme');
 const product = require('./routes/product');
+const cart = require('./routes/cart');
 
 app.use(cors());
 app.use(express.json());
@@ -15,6 +16,7 @@ app.use('/uploads', express.static(path.join(__dirname,'uploads')));
 app.use('/api/v1/', auth);
 app.use('/api/v1/', theme);
 app.use('/api/v1/', product);
+app.use('/api/v1/', cart);
 
 app.use(errorMiddleware)
 
