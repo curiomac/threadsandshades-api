@@ -1,13 +1,21 @@
 [
   {
-    "image": "image_1",
+    "images": [
+      {
+        "image": "http://127.0.0.1:8000/uploads/product/image-1.png"
+      }
+    ],
     "title": "Kids' North Hooded Water Repellent 600 Fill Power Down Jacket",
     "description": "null",
     "price": "600",
     "availableColors": ["#ce2238", "#a0a0a1"]
   },
   {
-    "image": "image_2",
+    "images": [
+      {
+        "image": "http://127.0.0.1:8000/uploads/product/image-2.png"
+      }
+    ],
     "title": "Kids' Tech Fleece Full Zip Hoodie",
     "description": "null",
     "price": "700",
@@ -16,14 +24,22 @@
     "availableColors": ["#222021", "#fff"]
   },
   {
-    "image": "image_3",
+    "images": [
+      {
+        "image": "http://127.0.0.1:8000/uploads/product/image-3.png"
+      }
+    ],
     "title": "Kids' North Hooded Water Repellent 600 Fill Power Down Jacket",
     "description": "null",
     "price": "599",
     "availableColors": ["#2d9a7a", "#222021", "#1693e0", "#fc5500"]
   },
   {
-    "image": "image_4",
+    "images": [
+      {
+        "image": "http://127.0.0.1:8000/uploads/product/image-4.png"
+      }
+    ],
     "title": "Kids' Tech Fleece Full Zip Hoodie",
     "description": "null",
     "price": "999",
@@ -32,28 +48,44 @@
     "availableColors": ["#7493c6", "#2d4876", "#68748c"]
   },
   {
-    "image": "image_5",
+    "images": [
+      {
+        "image": "http://127.0.0.1:8000/uploads/product/image-5.png"
+      }
+    ],
     "title": "Kids' North Hooded Water Repellent 600 Fill Power Down Jacket",
     "description": "null",
     "price": "658",
     "availableColors": ["#373754", "#274b9b"]
   },
   {
-    "image": "image_6",
+    "images": [
+      {
+        "image": "http://127.0.0.1:8000/uploads/product/image-6.png"
+      }
+    ],
     "title": "Kids' Tech Fleece Full Zip Hoodie",
     "description": "null",
     "price": "250",
     "availableColors": ["#28252d", "#fff"]
   },
   {
-    "image": "image_1",
+    "images": [
+      {
+        "image": "http://127.0.0.1:8000/uploads/product/image-1.png"
+      }
+    ],
     "title": "Kids' North Hooded Water Repellent 600 Fill Power Down Jacket",
     "description": "null",
     "price": "600",
     "availableColors": ["#ce2238", "#a0a0a1"]
   },
   {
-    "image": "image_2",
+    "images": [
+      {
+        "image": "http://127.0.0.1:8000/uploads/product/image-2.png"
+      }
+    ],
     "title": "Kids' Tech Fleece Full Zip Hoodie",
     "description": "null",
     "price": "700",
@@ -62,14 +94,22 @@
     "availableColors": ["#222021", "#fff"]
   },
   {
-    "image": "image_3",
+    "images": [
+      {
+        "image": "http://127.0.0.1:8000/uploads/product/image-3.png"
+      }
+    ],
     "title": "Kids' North Hooded Water Repellent 600 Fill Power Down Jacket",
     "description": "null",
     "price": "599",
     "availableColors": ["#2d9a7a", "#222021", "#1693e0", "#fc5500"]
   },
   {
-    "image": "image_4",
+    "images": [
+      {
+        "image": "http://127.0.0.1:8000/uploads/product/image-4.png"
+      }
+    ],
     "title": "Kids' Tech Fleece Full Zip Hoodie",
     "description": "null",
     "price": "999",
@@ -78,14 +118,22 @@
     "availableColors": ["#7493c6", "#2d4876", "#68748c"]
   },
   {
-    "image": "image_5",
+    "images": [
+      {
+        "image": "http://127.0.0.1:8000/uploads/product/image-5.png"
+      }
+    ],
     "title": "Kids' North Hooded Water Repellent 600 Fill Power Down Jacket",
     "description": "null",
     "price": "658",
     "availableColors": ["#373754", "#274b9b"]
   },
   {
-    "image": "image_6",
+    "images": [
+      {
+        "image": "http://127.0.0.1:8000/uploads/product/image-6.png"
+      }
+    ],
     "title": "Kids' Tech Fleece Full Zip Hoodie",
     "description": "null",
     "price": "250",

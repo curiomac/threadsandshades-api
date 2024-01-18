@@ -3,20 +3,18 @@ const ErrorHandler = require("../utils/errorHandler");
 const Cart = require("../models/cartModel");
 const User = require("../models/userModel");
 const Product = require("../models/productModel");
+
 // get cart items - /api/v1/cart/:id
 exports.getCartItems = catchAsyncError(async (req, res, next) => {
   const user_id = req.params.id;
   const cart = await Cart.findOne({ user_id });
-  if (!cart) {
-    return next(new ErrorHandler("Cart not found with this user id", 404));
-  }
-  const cartCount = cart.cart_items.length;
+
   res.status(200).json({
     success: true,
-    cart,
-    cart_count: cartCount,
+    cart: { ...cart?.toObject(), cart_count: cart ? cart.cart_items.length : 0 },
   });
 });
+
 // add cart - /api/v1/cart/add
 exports.addCart = catchAsyncError(async (req, res, next) => {
   const { product_id, user_id } = req.query;
@@ -38,10 +36,8 @@ exports.addCart = catchAsyncError(async (req, res, next) => {
   if (!cart) {
     cart = await Cart.create({ user_id, cart_items: [product] });
   }
-  const cartCount = cart.cart_items.length;
   res.status(200).json({
     success: true,
-    cart,
-    cart_count: cartCount,
+    cart: { ...cart?.toObject(), cart_count: cart ? cart.cart_items.length : 0 },
   });
 });

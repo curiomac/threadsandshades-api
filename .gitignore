@@ -48,6 +48,3 @@ node_modules/
 
 # Serverless directories
 .serverless/
-
-# Uploaded Files
-uploads/*
