@@ -8,6 +8,7 @@ const auth = require('./routes/auth');
 const theme = require('./routes/theme');
 const product = require('./routes/product');
 const cart = require('./routes/cart');
+const wishList = require('./routes/wishList');
 
 app.use(cors());
 app.use(express.json());
@@ -17,6 +18,7 @@ app.use('/api/v1/', auth);
 app.use('/api/v1/', theme);
 app.use('/api/v1/', product);
 app.use('/api/v1/', cart);
+app.use('/api/v1/', wishList);
 
 app.use(errorMiddleware)
 
