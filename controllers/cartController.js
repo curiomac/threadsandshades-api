@@ -41,3 +41,32 @@ exports.addCart = catchAsyncError(async (req, res, next) => {
     cart: { ...cart?.toObject(), cart_count: cart ? cart.cart_items.length : 0 },
   });
 });
+
+// remove cart - /api/v1/cart/remove
+exports.removeCart = catchAsyncError(async (req, res, next) => {
+  const { product_id, user_id } = req.query;
+
+  const user = await User.findById(user_id);
+  if (!user) {
+    return next(new Error("User not found"));
+  }
+
+  const product = await Product.findById(product_id);
+  if (!product) {
+    return next(new Error("Product not found"));
+  }
+
+  const cart = await Cart.findOneAndUpdate(
+    { user_id },
+    { $pull: { cart_items: { _id: product._id } } },
+    { new: true }
+  );
+
+  res.status(200).json({
+    success: true,
+    cart: {
+      ...cart?.toObject(),
+      cart_count: cart ? cart.cart_items.length : 0,
+    },
+  });
+});
