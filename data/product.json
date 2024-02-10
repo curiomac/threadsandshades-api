@@ -1,142 +1,188 @@
 [
   {
-    "images": [
-      {
-        "image": "http://127.0.0.1:8000/uploads/product/image-1.png"
-      }
+    "product_title": "Kids' North Hooded Water Repellent 600 Fill Power Down Jacket",
+    "product_label": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "product_images": [
+      "https://threadsandshades-dev.onrender.com/uploads/product/image-1.png"
     ],
-    "title": "Kids' North Hooded Water Repellent 600 Fill Power Down Jacket",
-    "description": "null",
-    "price": "600",
-    "availableColors": ["#ce2238", "#a0a0a1"]
+    "product_tags": ["Slim-Fit", "Shirt"],
+    "product_type": "Shirt",
+    "target_gender": "Male",
+    "available_colors": ["red", "gray"],
+    "available_color_codes": ["#a0a0a1", "#ce2238"],
+    "available_sizes": ["30", "32", "36"],
+    "out_of_stock_sizes": ["34"],
+    "available_quantity": "250",
+    "minimum_quantity": "1",
+    "maximum_quantity": "100",
+    "unit_price": "399",
+    "profit_percentage": "100",
+    "sale_price": "798",
+    "discount_percentage": "20",
+    "discount_price": "159.6",
+    "discount_start_date": "01-02-2024",
+    "discount_end_date": "15-02-2024",
+    "return_days": "5",
+    "exchange_days": "6",
+    "delivery_within_local": "150",
+    "delivery_within_district": "180",
+    "delivery_within_state": "200",
+    "delivery_inter_state": "280",
+    "product_status": "in-active"
   },
   {
-    "images": [
-      {
-        "image": "http://127.0.0.1:8000/uploads/product/image-2.png"
-      }
+    "product_title": "Kids' Tech Fleece Full Zip Hoodie",
+    "product_label": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "product_images": [
+      "https://threadsandshades-dev.onrender.com/uploads/product/image-2.png"
     ],
-    "title": "Kids' Tech Fleece Full Zip Hoodie",
-    "description": "null",
-    "price": "700",
-    "offerPrice": "350",
-    "discount": "50",
-    "availableColors": ["#222021", "#fff"]
+    "product_tags": ["Slim-Fit", "Shirt"],
+    "product_type": "Shirt",
+    "target_gender": "Male",
+    "available_colors": ["black", "white"],
+    "available_color_codes": ["#222021", "#fff"],
+    "available_sizes": ["30", "32", "36"],
+    "out_of_stock_sizes": ["34"],
+    "available_quantity": "250",
+    "minimum_quantity": "1",
+    "maximum_quantity": "100",
+    "unit_price": "399",
+    "profit_percentage": "100",
+    "sale_price": "798",
+    "discount_percentage": "20",
+    "discount_price": "159.6",
+    "discount_start_date": "01-02-2024",
+    "discount_end_date": "15-02-2024",
+    "return_days": "5",
+    "exchange_days": "6",
+    "delivery_within_local": "150",
+    "delivery_within_district": "180",
+    "delivery_within_state": "200",
+    "delivery_inter_state": "280",
+    "product_status": "in-active"
   },
   {
-    "images": [
-      {
-        "image": "http://127.0.0.1:8000/uploads/product/image-3.png"
-      }
+    "product_title": "Kids' North Hooded Water Repellent 600 Fill Power Down Jacket",
+    "product_label": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "product_images": [
+      "https://threadsandshades-dev.onrender.com/uploads/product/image-3.png"
     ],
-    "title": "Kids' North Hooded Water Repellent 600 Fill Power Down Jacket",
-    "description": "null",
-    "price": "599",
-    "availableColors": ["#2d9a7a", "#222021", "#1693e0", "#fc5500"]
+    "product_tags": ["Slim-Fit", "Shirt"],
+    "product_type": "Shirt",
+    "target_gender": "Male",
+    "available_colors": ["green", "black", "blue", "orange"],
+    "available_color_codes": ["#2d9a7a", "#222021", "#1693e0", "#fc5500"],
+    "available_sizes": ["30", "32", "36"],
+    "out_of_stock_sizes": ["34"],
+    "available_quantity": "250",
+    "minimum_quantity": "1",
+    "maximum_quantity": "100",
+    "unit_price": "399",
+    "profit_percentage": "100",
+    "sale_price": "798",
+    "discount_percentage": "20",
+    "discount_price": "159.6",
+    "discount_start_date": "01-02-2024",
+    "discount_end_date": "15-02-2024",
+    "return_days": "5",
+    "exchange_days": "6",
+    "delivery_within_local": "150",
+    "delivery_within_district": "180",
+    "delivery_within_state": "200",
+    "delivery_inter_state": "280",
+    "product_status": "in-active"
   },
   {
-    "images": [
-      {
-        "image": "http://127.0.0.1:8000/uploads/product/image-4.png"
-      }
+    "product_title": "Kids' Tech Fleece Full Zip Hoodie",
+    "product_label": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "product_images": [
+      "https://threadsandshades-dev.onrender.com/uploads/product/image-4.png"
     ],
-    "title": "Kids' Tech Fleece Full Zip Hoodie",
-    "description": "null",
-    "price": "999",
-    "offerPrice": "790",
-    "discount": "20",
-    "availableColors": ["#7493c6", "#2d4876", "#68748c"]
+    "product_tags": ["Slim-Fit", "Shirt"],
+    "product_type": "Shirt",
+    "target_gender": "Male",
+    "available_colors": ["ash blue", "navy blue", "dark ash blue"],
+    "available_color_codes": ["#7493c6", "#2d4876", "#68748c"],
+    "available_sizes": ["30", "32", "36"],
+    "out_of_stock_sizes": ["34"],
+    "available_quantity": "250",
+    "minimum_quantity": "1",
+    "maximum_quantity": "100",
+    "unit_price": "399",
+    "profit_percentage": "100",
+    "sale_price": "798",
+    "discount_percentage": "20",
+    "discount_price": "159.6",
+    "discount_start_date": "01-02-2024",
+    "discount_end_date": "15-02-2024",
+    "return_days": "5",
+    "exchange_days": "6",
+    "delivery_within_local": "150",
+    "delivery_within_district": "180",
+    "delivery_within_state": "200",
+    "delivery_inter_state": "280",
+    "product_status": "in-active"
   },
   {
-    "images": [
-      {
-        "image": "http://127.0.0.1:8000/uploads/product/image-5.png"
-      }
+    "product_title": "Kids' North Hooded Water Repellent 600 Fill Power Down Jacket",
+    "product_label": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "product_images": [
+      "https://threadsandshades-dev.onrender.com/uploads/product/image-5.png"
     ],
-    "title": "Kids' North Hooded Water Repellent 600 Fill Power Down Jacket",
-    "description": "null",
-    "price": "658",
-    "availableColors": ["#373754", "#274b9b"]
+    "product_tags": ["Slim-Fit", "Shirt"],
+    "product_type": "Shirt",
+    "target_gender": "Male",
+    "available_colors": ["navy blue", "blue"],
+    "available_color_codes": ["#373754", "#274b9b"],
+    "available_sizes": ["30", "32", "36"],
+    "out_of_stock_sizes": ["34"],
+    "available_quantity": "250",
+    "minimum_quantity": "1",
+    "maximum_quantity": "100",
+    "unit_price": "399",
+    "profit_percentage": "100",
+    "sale_price": "798",
+    "discount_percentage": "20",
+    "discount_price": "159.6",
+    "discount_start_date": "01-02-2024",
+    "discount_end_date": "15-02-2024",
+    "return_days": "5",
+    "exchange_days": "6",
+    "delivery_within_local": "150",
+    "delivery_within_district": "180",
+    "delivery_within_state": "200",
+    "delivery_inter_state": "280",
+    "product_status": "in-active"
   },
   {
-    "images": [
-      {
-        "image": "http://127.0.0.1:8000/uploads/product/image-6.png"
-      }
+    "product_title": "Kids' Tech Fleece Full Zip Hoodie",
+    "product_label": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "product_images": [
+      "https://threadsandshades-dev.onrender.com/uploads/product/image-6.png"
     ],
-    "title": "Kids' Tech Fleece Full Zip Hoodie",
-    "description": "null",
-    "price": "250",
-    "availableColors": ["#28252d", "#fff"]
-  },
-  {
-    "images": [
-      {
-        "image": "http://127.0.0.1:8000/uploads/product/image-1.png"
-      }
-    ],
-    "title": "Kids' North Hooded Water Repellent 600 Fill Power Down Jacket",
-    "description": "null",
-    "price": "600",
-    "availableColors": ["#ce2238", "#a0a0a1"]
-  },
-  {
-    "images": [
-      {
-        "image": "http://127.0.0.1:8000/uploads/product/image-2.png"
-      }
-    ],
-    "title": "Kids' Tech Fleece Full Zip Hoodie",
-    "description": "null",
-    "price": "700",
-    "offerPrice": "350",
-    "discount": "50",
-    "availableColors": ["#222021", "#fff"]
-  },
-  {
-    "images": [
-      {
-        "image": "http://127.0.0.1:8000/uploads/product/image-3.png"
-      }
-    ],
-    "title": "Kids' North Hooded Water Repellent 600 Fill Power Down Jacket",
-    "description": "null",
-    "price": "599",
-    "availableColors": ["#2d9a7a", "#222021", "#1693e0", "#fc5500"]
-  },
-  {
-    "images": [
-      {
-        "image": "http://127.0.0.1:8000/uploads/product/image-4.png"
-      }
-    ],
-    "title": "Kids' Tech Fleece Full Zip Hoodie",
-    "description": "null",
-    "price": "999",
-    "offerPrice": "790",
-    "discount": "20",
-    "availableColors": ["#7493c6", "#2d4876", "#68748c"]
-  },
-  {
-    "images": [
-      {
-        "image": "http://127.0.0.1:8000/uploads/product/image-5.png"
-      }
-    ],
-    "title": "Kids' North Hooded Water Repellent 600 Fill Power Down Jacket",
-    "description": "null",
-    "price": "658",
-    "availableColors": ["#373754", "#274b9b"]
-  },
-  {
-    "images": [
-      {
-        "image": "http://127.0.0.1:8000/uploads/product/image-6.png"
-      }
-    ],
-    "title": "Kids' Tech Fleece Full Zip Hoodie",
-    "description": "null",
-    "price": "250",
-    "availableColors": ["#28252d", "#fff"]
+    "product_tags": ["Slim-Fit", "Shirt"],
+    "product_type": "Shirt",
+    "target_gender": "Male",
+    "available_colors": ["black", "white"],
+    "available_color_codes": ["#28252d", "#fff"],
+    "available_sizes": ["30", "32", "36"],
+    "out_of_stock_sizes": ["34"],
+    "available_quantity": "250",
+    "minimum_quantity": "1",
+    "maximum_quantity": "100",
+    "unit_price": "399",
+    "profit_percentage": "100",
+    "sale_price": "798",
+    "discount_percentage": "20",
+    "discount_price": "159.6",
+    "discount_start_date": "01-02-2024",
+    "discount_end_date": "15-02-2024",
+    "return_days": "5",
+    "exchange_days": "6",
+    "delivery_within_local": "150",
+    "delivery_within_district": "180",
+    "delivery_within_state": "200",
+    "delivery_inter_state": "280",
+    "product_status": "in-active"
   }
 ]

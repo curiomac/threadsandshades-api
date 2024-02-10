@@ -11,13 +11,22 @@ exports.getCartItems = catchAsyncError(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    cart: { ...cart?.toObject(), cart_count: cart ? cart.cart_items.length : 0 },
+    cart: {
+      ...cart?.toObject(),
+      cart_count: cart ? cart.cart_items.length : 0,
+    },
   });
 });
 
 // add cart - /api/v1/cart/add
 exports.addCart = catchAsyncError(async (req, res, next) => {
-  const { product_id, user_id } = req.query;
+  const {
+    product_id,
+    user_id,
+    selected_color,
+    selected_color_code,
+    selected_size,
+  } = req.body;
   const [user, product] = await Promise.all([
     User.findById(user_id),
     Product.findById(product_id),
@@ -28,17 +37,31 @@ exports.addCart = catchAsyncError(async (req, res, next) => {
   if (!product) {
     return next(new Error("Product not found"));
   }
+  if (!selected_color || !selected_color_code || !selected_size) {
+    return next(new Error("Please provide all details"));
+  }
+  const selected_appearance = {
+    selected_color,
+    selected_color_code,
+    selected_size,
+  };
   let cart = await Cart.findOneAndUpdate(
     { user_id },
-    { $addToSet: { cart_items: product } },
+    { $addToSet: { cart_items: { product, selected_appearance } } },
     { new: true }
   );
   if (!cart) {
-    cart = await Cart.create({ user_id, cart_items: [product] });
+    cart = await Cart.create({
+      user_id,
+      cart_items: [{ product, selected_appearance }],
+    });
   }
   res.status(200).json({
     success: true,
-    cart: { ...cart?.toObject(), cart_count: cart ? cart.cart_items.length : 0 },
+    cart: {
+      ...cart?.toObject(),
+      cart_count: cart ? cart.cart_items.length : 0,
+    },
   });
 });
 
@@ -58,7 +81,7 @@ exports.removeCart = catchAsyncError(async (req, res, next) => {
 
   const cart = await Cart.findOneAndUpdate(
     { user_id },
-    { $pull: { cart_items: { _id: product._id } } },
+    { $pull: { cart_items: { product: { _id: product._id } } } },
     { new: true }
   );
 
