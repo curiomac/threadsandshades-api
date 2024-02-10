@@ -1,5 +1,6 @@
 const catchAsyncError = require("../middlewares/catchAsyncError");
 const Product = require("../models/productModel");
+const ProductsGroup = require("../models/productsGroupModel");
 const ErrorHandler = require("../utils/errorHandler");
 const APIFeatures = require("../utils/apiFeatures");
 const { v4: uuidv4 } = require("uuid");
@@ -21,7 +22,7 @@ exports.getProduct = catchAsyncError(async (req, res, next) => {
 
 // get products - /api/v1/products
 exports.getProducts = catchAsyncError(async (req, res, next) => {
-  const resPerPage = 109;
+  const resPerPage = 1000;
   let buildQuery = () => {
     return new APIFeatures(Product.find(), req.query).search().filter();
   };
@@ -58,6 +59,7 @@ exports.createProduct = catchAsyncError(async (req, res, next) => {
     sale_price,
     discount_percentage,
     discount_price,
+    products_group_id,
   } = req.body;
   const isValidSalePrice = () => {
     const profitMargin = profit_percentage / 100;
@@ -96,9 +98,70 @@ exports.createProduct = catchAsyncError(async (req, res, next) => {
     fixed_price,
   };
   const product = await Product.create(create_product);
+
+  let products_group_data = await ProductsGroup.findOneAndUpdate(
+    { "products_group.products_group_id": products_group_id },
+    { $addToSet: { group: product } },
+    { new: true }
+  );
+
+  if (!products_group_data) {
+    products_group_data = await ProductsGroup.create({
+      group: [product],
+    });
+  }
+
+  console.log("products_group_data: ", products_group_data);
   res.status(200).json({
     success: true,
     product,
     message: "Product creation successful",
+  });
+});
+// get products group -/api/v1/products/group/:id
+exports.getProductsGroup = catchAsyncError(async (req, res, next) => {
+  const product_group_id = req.params.id;
+  const products_group = await ProductsGroup.findById(product_group_id);
+  if (!products_group || products_group.length === 0) {
+    return next(
+      new ErrorHandler("No products found for this product group ID", 404)
+    );
+  }
+  res.status(200).json({
+    success: true,
+    products_group,
+  });
+});
+// get products groups -/api/v1/products/groups
+exports.getProductsGroups = catchAsyncError(async (req, res, next) => {
+  const resPerPage = 109;
+  let buildQuery = () => {
+    return new APIFeatures(ProductsGroup.find(), req.query).search().filter();
+  };
+  const filteredProductsGroupCount = await buildQuery().query.countDocuments(
+    {}
+  );
+  const totalProductsGroupsCount = await ProductsGroup.countDocuments({});
+  let productsGroupsCount = totalProductsGroupsCount;
+  if (filteredProductsGroupCount !== totalProductsGroupsCount) {
+    productsGroupsCount = filteredProductsGroupCount;
+  }
+  const currentPage = parseInt(req.query.page);
+  const totalPages =
+    Math.ceil(productsGroupsCount / resPerPage) > 0
+      ? Math.ceil(productsGroupsCount / resPerPage)
+      : 1;
+  const productsGroups = await buildQuery().paginate(resPerPage).query;
+
+  if (productsGroupsCount === 0) {
+    return next(new ErrorHandler("No products groups found", 404));
+  }
+  res.status(200).json({
+    success: true,
+    resPerPage,
+    totalCounts: productsGroupsCount,
+    totalPages,
+    currentPage,
+    productsGroups,
   });
 });

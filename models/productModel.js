@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const productSchema = new mongoose.Schema({
-  product_group_id: {
+  products_group_id: {
     type: String,
     required: [true, "Please enter the product group id"]
   },
