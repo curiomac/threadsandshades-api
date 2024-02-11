@@ -98,9 +98,8 @@ exports.createProduct = catchAsyncError(async (req, res, next) => {
     fixed_price,
   };
   const product = await Product.create(create_product);
-
   let products_group_data = await ProductsGroup.findOneAndUpdate(
-    { "products_group.products_group_id": products_group_id },
+    { "group.products_group_id": products_group_id },
     { $addToSet: { group: product } },
     { new: true }
   );
@@ -110,14 +109,13 @@ exports.createProduct = catchAsyncError(async (req, res, next) => {
       group: [product],
     });
   }
-
-  console.log("products_group_data: ", products_group_data);
   res.status(200).json({
     success: true,
     product,
     message: "Product creation successful",
   });
 });
+
 // get products group -/api/v1/products/group/:id
 exports.getProductsGroup = catchAsyncError(async (req, res, next) => {
   const product_group_id = req.params.id;
@@ -132,6 +130,7 @@ exports.getProductsGroup = catchAsyncError(async (req, res, next) => {
     products_group,
   });
 });
+
 // get products groups -/api/v1/products/groups
 exports.getProductsGroups = catchAsyncError(async (req, res, next) => {
   const resPerPage = 109;
