@@ -3,20 +3,22 @@ const Product = require("../models/productModel");
 const ProductsGroup = require("../models/productsGroupModel");
 const ErrorHandler = require("../utils/errorHandler");
 const APIFeatures = require("../utils/apiFeatures");
-const { v4: uuidv4 } = require("uuid");
-const fs = require("fs");
-const path = require("path");
 
 // get product - /api/v1/product/:id
 exports.getProduct = catchAsyncError(async (req, res, next) => {
   const product_id = req.params.id;
   const product = await Product.findById(product_id);
+  const products_group = await ProductsGroup.findOne({ "group.products_group_id": product?.products_group_id });
   if (!product) {
     return next(new ErrorHandler("Product not found with this id", 404));
+  }
+  if (!products_group) {
+    return next(new ErrorHandler("Product group not found", 404));
   }
   res.status(200).json({
     success: true,
     product,
+    products_group
   });
 });
 
