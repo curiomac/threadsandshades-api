@@ -73,5 +73,4 @@ exports.moveWishList = catchAsyncError(async (req, res, next) => {
       },
     });
   }
-  
 });
