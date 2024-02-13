@@ -3,6 +3,7 @@ const ErrorHandler = require("../utils/errorHandler");
 const Cart = require("../models/cartModel");
 const User = require("../models/userModel");
 const Product = require("../models/productModel");
+const mongoose = require("mongoose");
 
 // get cart items - /api/v1/cart/:id
 exports.getCartItems = catchAsyncError(async (req, res, next) => {
@@ -67,29 +68,45 @@ exports.addCart = catchAsyncError(async (req, res, next) => {
 
 // remove cart - /api/v1/cart/remove
 exports.removeCart = catchAsyncError(async (req, res, next) => {
+  
   const { product_id, user_id } = req.query;
-
+  const productId = mongoose.Types.ObjectId(product_id);
   const user = await User.findById(user_id);
+
   if (!user) {
     return next(new Error("User not found"));
   }
 
   const product = await Product.findById(product_id);
+
   if (!product) {
     return next(new Error("Product not found"));
   }
 
-  const cart = await Cart.findOneAndUpdate(
-    { user_id },
-    { $pull: { cart_items: { product: { _id: product._id } } } },
-    { new: true }
+  const cart = await Cart.findOne({ user_id });
+
+  if (!cart) {
+    return res.status(404).json({ success: false, message: "Cart not found" });
+  }
+
+  const productIndex = cart.cart_items.findIndex((item) =>
+    item.product._id.equals(productId)
   );
 
+  if (productIndex === -1) {
+    return res
+      .status(404)
+      .json({ success: false, message: "Product not found in cart" });
+  }
+  cart.cart_items.splice(productIndex, 1);
+
+  await cart.save();
+  
   res.status(200).json({
     success: true,
     cart: {
-      ...cart?.toObject(),
-      cart_count: cart ? cart.cart_items.length : 0,
+      ...cart.toObject(),
+      cart_count: cart.cart_items.length,
     },
   });
 });
