@@ -40,13 +40,15 @@ exports.getProducts = catchAsyncError(async (req, res, next) => {
       ? Math.ceil(productsCount / resPerPage)
       : 1;
   const products = await buildQuery().paginate(resPerPage).query;
-  const formated_products = products.map(async(product) => {
+  // console.log("products: ", products)
+  const formated_products = await Promise.all(products.map(async (product) => {
     const products_group = await ProductsGroup.findOne({ "group.products_group_id": product?.products_group_id });
     return {
-      ...product,
-      group: products_group
-    }
-  })
+      ...product._doc,
+      group: products_group.group
+    };
+  }));
+  console.log("formated_products: ", formated_products)
 
   if (productsCount === 0) {
     return next(new ErrorHandler("No products found", 404));
