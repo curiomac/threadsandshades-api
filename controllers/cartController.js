@@ -27,6 +27,7 @@ exports.addCart = catchAsyncError(async (req, res, next) => {
     selected_color,
     selected_color_code,
     selected_size,
+    selected_quantity
   } = req.body;
   const [user, product] = await Promise.all([
     User.findById(user_id),
@@ -41,20 +42,21 @@ exports.addCart = catchAsyncError(async (req, res, next) => {
   if (!selected_color || !selected_color_code || !selected_size) {
     return next(new Error("Please provide all details"));
   }
-  const selected_appearance = {
+  const selected_product_details = {
     selected_color,
     selected_color_code,
     selected_size,
+    selected_quantity
   };
   let cart = await Cart.findOneAndUpdate(
     { user_id },
-    { $addToSet: { cart_items: { product, selected_appearance } } },
+    { $addToSet: { cart_items: { product, selected_product_details } } },
     { new: true }
   );
   if (!cart) {
     cart = await Cart.create({
       user_id,
-      cart_items: [{ product, selected_appearance }],
+      cart_items: [{ product, selected_product_details }],
     });
   }
   res.status(200).json({
