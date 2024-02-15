@@ -9,11 +9,19 @@ const mongoose = require("mongoose");
 exports.getCartItems = catchAsyncError(async (req, res, next) => {
   const user_id = req.params.id;
   const cart = await Cart.findOne({ user_id });
-
+  const cart_items_res = await Promise.all(
+    cart.cart_items.map(async (item) => {
+      const found_product = await Product.findById(item.product_id);
+      return {
+        selected_product_details: item.selected_product_details,
+        product: found_product,
+      };
+    })
+  );
   res.status(200).json({
     success: true,
     cart: {
-      ...cart?.toObject(),
+      cart_items: cart_items_res,
       cart_count: cart ? cart.cart_items.length : 0,
     },
   });
@@ -27,7 +35,7 @@ exports.addCart = catchAsyncError(async (req, res, next) => {
     selected_color,
     selected_color_code,
     selected_size,
-    selected_quantity
+    selected_quantity,
   } = req.body;
   const [user, product] = await Promise.all([
     User.findById(user_id),
@@ -46,23 +54,37 @@ exports.addCart = catchAsyncError(async (req, res, next) => {
     selected_color,
     selected_color_code,
     selected_size,
-    selected_quantity
+    selected_quantity,
   };
   let cart = await Cart.findOneAndUpdate(
     { user_id },
-    { $addToSet: { cart_items: { product, selected_product_details } } },
+    {
+      $addToSet: {
+        cart_items: { product_id: product._id, selected_product_details },
+      },
+    },
     { new: true }
   );
   if (!cart) {
     cart = await Cart.create({
       user_id,
-      cart_items: [{ product, selected_product_details }],
+      cart_items: [{ product_id: product._id, selected_product_details }],
     });
   }
+  const cart_items_res = await Promise.all(
+    cart.cart_items.map(async (item) => {
+      const found_product = await Product.findById(item.product_id);
+      return {
+        selected_product_details: item.selected_product_details,
+        product: found_product,
+      };
+    })
+  );
+  
   res.status(200).json({
     success: true,
     cart: {
-      ...cart?.toObject(),
+      cart_items: cart_items_res,
       cart_count: cart ? cart.cart_items.length : 0,
     },
   });
@@ -70,7 +92,6 @@ exports.addCart = catchAsyncError(async (req, res, next) => {
 
 // remove cart - /api/v1/cart/remove
 exports.removeCart = catchAsyncError(async (req, res, next) => {
-  
   const { product_id, user_id } = req.query;
   const productId = mongoose.Types.ObjectId(product_id);
   const user = await User.findById(user_id);
@@ -92,7 +113,7 @@ exports.removeCart = catchAsyncError(async (req, res, next) => {
   }
 
   const productIndex = cart.cart_items.findIndex((item) =>
-    item.product._id.equals(productId)
+    item.product_id.equals(productId)
   );
 
   if (productIndex === -1) {
@@ -103,12 +124,21 @@ exports.removeCart = catchAsyncError(async (req, res, next) => {
   cart.cart_items.splice(productIndex, 1);
 
   await cart.save();
-  
+
+  const cart_items_res = await Promise.all(
+    cart.cart_items.map(async (item) => {
+      const found_product = await Product.findById(item.product_id);
+      return {
+        selected_product_details: item.selected_product_details,
+        product: found_product,
+      };
+    })
+  );
   res.status(200).json({
     success: true,
     cart: {
-      ...cart.toObject(),
-      cart_count: cart.cart_items.length,
+      cart_items: cart_items_res,
+      cart_count: cart ? cart.cart_items.length : 0,
     },
   });
 });

@@ -48,7 +48,6 @@ exports.getProducts = catchAsyncError(async (req, res, next) => {
       group: products_group.group
     };
   }));
-  console.log("formated_products: ", formated_products)
 
   if (productsCount === 0) {
     return next(new ErrorHandler("No products found", 404));

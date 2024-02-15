@@ -9,6 +9,7 @@ const theme = require('./routes/theme');
 const product = require('./routes/product');
 const cart = require('./routes/cart');
 const wishList = require('./routes/wishList');
+const checkoutDetails = require('./routes/checkoutDetails');
 
 app.use(cors());
 app.use(express.json());
@@ -19,6 +20,7 @@ app.use('/api/v1/', theme);
 app.use('/api/v1/', product);
 app.use('/api/v1/', cart);
 app.use('/api/v1/', wishList);
+app.use('/api/v1/', checkoutDetails);
 
 app.use(errorMiddleware)
 
