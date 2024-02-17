@@ -85,22 +85,24 @@ exports.getCheckoutDetails = catchAsyncError(async (req, res, next) => {
         //   { new: true }
         // );
         if (found_coupon_code.discount_by === "discount_price") {
-          coupon_discount =
-            cartTotal - parseFloat(found_coupon_code.discount_price);
           coupon_discounted_total =
             cartTotal - parseFloat(found_coupon_code.discount_price);
+          coupon_discount =
+            cartTotal - coupon_discounted_total;
+          console.log("coupon_discount: ", coupon_discount);
+          console.log("coupon_discounted_total: ", coupon_discounted_total);
         } else if (found_coupon_code.discount_by === "discount_percentage") {
           const coupon_discount_persentage =
             (cartTotal * parseFloat(found_coupon_code.discount_percentage)) /
             100;
-            coupon_discounted_total = cartTotal - coupon_discount_persentage;
+          coupon_discounted_total = cartTotal - coupon_discount_persentage;
           coupon_discount = cartTotal - coupon_discounted_total;
           console.log("coupon_discount: ", coupon_discount);
           console.log("coupon_discounted_total: ", coupon_discounted_total);
         }
         coupon_applied = true;
       } else {
-        return next(new ErrorHandler("Invalid coupon code"));
+        return next(new ErrorHandler(`Total MRP should above ${found_coupon_code.mimimum_purchase_amount}`));
       }
     } else {
       return next(new ErrorHandler("Invalid coupon code"));
