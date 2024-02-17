@@ -10,6 +10,7 @@ const product = require('./routes/product');
 const cart = require('./routes/cart');
 const wishList = require('./routes/wishList');
 const checkoutDetails = require('./routes/checkoutDetails');
+const couponCode = require('./routes/couponCode');
 
 app.use(cors());
 app.use(express.json());
@@ -21,6 +22,7 @@ app.use('/api/v1/', product);
 app.use('/api/v1/', cart);
 app.use('/api/v1/', wishList);
 app.use('/api/v1/', checkoutDetails);
+app.use('/api/v1/', couponCode);
 
 app.use(errorMiddleware)
 
