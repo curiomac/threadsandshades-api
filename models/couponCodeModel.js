@@ -9,6 +9,10 @@ const couponCodeSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  valid_product: {
+    type: String,
+    required: true,
+  },
   expire_on: {
     type: String,
     required: true,
@@ -21,9 +25,21 @@ const couponCodeSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  discount_percentage: {
+    type: String,
+    required: true,
+  },
+  discount_by: {
+    type: String,
+    required: true,
+  },
   mimimum_purchase_amount: {
     type: String,
     required: true,
+  },
+  applied_users: {
+    type: Array,
+    require: true,
   },
   createdAt: {
     type: Date,
@@ -34,4 +50,3 @@ const couponCodeSchema = new mongoose.Schema({
 let CouponCode = mongoose.model("CouponCode", couponCodeSchema);
 
 module.exports = CouponCode;
-
