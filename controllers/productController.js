@@ -61,9 +61,7 @@ exports.getProducts = catchAsyncError(async (req, res, next) => {
           { $set: { is_discounted_product: true } },
           { new: true }
         );
-        console.log("update_product: ", update_product);
       } else {
-        console.log("is_not_valid_discount");
         update_product = await Product.findByIdAndUpdate(
           item._id,
           { $set: { is_discounted_product: false } },
@@ -106,10 +104,6 @@ exports.createProduct = catchAsyncError(async (req, res, next) => {
   const isValidDiscountPrice = () => {
     const discountMargin = discount_percentage / 100;
     const discountPriceAmount = sale_price * discountMargin;
-    console.log(
-      Number(discountPriceAmount).toFixed(2),
-      Number(discount_price).toFixed(2)
-    );
     return (
       Number(discountPriceAmount).toFixed(2) ===
       Number(discount_price).toFixed(2)

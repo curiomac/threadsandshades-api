@@ -36,7 +36,6 @@ exports.createCouponCode = catchAsyncError(async (req, res, next) => {
   const found_coupon_code = await CouponCode.findOne({
     coupon_code: coupon_code,
   });
-  console.log("found_coupon_code: ", found_coupon_code);
   if (found_coupon_code) {
     return next(new ErrorHandler("Coupon code already found"));
   }
