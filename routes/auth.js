@@ -12,7 +12,8 @@ const { registerUser,
         getAllUsers,
         getUser,
         updateUser,
-        deleteUser } = require('../controllers/authController');
+        deleteUser, 
+        sendOTP} = require('../controllers/authController');
 const router = express.Router();
 const { isAuthenticatedUser, authorizeRoles } = require('../middlewares/authenticate');
 const upload = multer({
@@ -26,7 +27,8 @@ const upload = multer({
         })
 })
 
-router.route('/register').post(upload.single('avatar'), registerUser);
+router.route('/otp/send').post(sendOTP);
+router.route('/register').post(registerUser);
 router.route('/login').post(loginUser);
 router.route('/logout').get(logoutUser);
 router.route('/password/forgot').post(forgotPassword);

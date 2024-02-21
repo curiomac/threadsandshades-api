@@ -7,11 +7,9 @@ const crypto = require('crypto');
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: [true, 'Please enter name']
     },
     phone_number: {
         type: String,
-        required: [true, 'Please enter phone number']
     },
     email: {
         type: String,
@@ -21,15 +19,12 @@ const userSchema = new mongoose.Schema({
     },
     address: {
         type: String,
-        required: [true, 'Please enter address'],
     },
     postal_code: {
         type: String,
-        required: [true, 'Please enter postal code'],
     },
     password: {
         type: String,
-        required: [true, 'Please enter password'],
         minlength: [8, 'password cannot exceed 8 Characters'],
         select: false
     },

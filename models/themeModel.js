@@ -21,6 +21,10 @@ const themeSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    brand_logo: {
+        type: String,
+        required: true
+    }
 })
 
 
