@@ -8,6 +8,9 @@ const otpSchema = new mongoose.Schema({
   temporary_otp: {
     type: String,
   },
+  expiration_time: {
+    type: String,
+  },
   createdAt: {
     type: Date,
     default: Date.now(),

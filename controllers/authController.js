@@ -11,22 +11,42 @@ const path = require("path");
 
 // send otp - /api/v1/otp/send
 exports.sendOTP = catchAsyncError(async (req, res, next) => {
-  const { email } = req.body;
+  const { email, isAuth, reSendOTP } = req.body;
+  await OTP.deleteMany({ expiration_time: { $lt: new Date() } });
+  if (!email) {
+    return next(new ErrorHandler("Please enter an email", 400));
+  }
   const user = await User.findOne({ email });
-  if(user) {
-    return next(new ErrorHandler("Email already found", 400));
+  if (user && isAuth === "Register") {
+    return next(new ErrorHandler("Email already registered", 400));
+  }
+  if (reSendOTP) {
+    await OTP.deleteOne({ email });
+  }
+  const data = await OTP.findOne({ email });
+  if (data) {
+    return next(new ErrorHandler("OTP already sent", 400));
   }
   const otp = otpGenerator();
+  const expirationTime = new Date();
+  expirationTime.setMinutes(expirationTime.getMinutes() + 5);
   const verification_data = {
     email,
     temporary_otp: otp,
+    expiration_time: expirationTime,
   };
   await OTP.create(verification_data);
 
   const htmlTemplate = readHTMLTemplate(
     path.join(__dirname, "..", "ui/html/otp_email_template.html"),
-    "otp",
-    otp
+    {
+      greet:
+        isAuth === "Login"
+          ? "Great to see you again! Welcome back to Threads & Shades."
+          : isAuth === "Register" &&
+            "We’re excited you’ve joined Threads & Shades",
+      otp: otp,
+    }
   );
   sendEmail({
     email,
@@ -37,6 +57,7 @@ exports.sendOTP = catchAsyncError(async (req, res, next) => {
     success: true,
     message: "OTP sent successfully",
     code: "proceed-otp",
+    expires_on: expirationTime,
   });
 });
 // register user - /api/v1/register
@@ -45,6 +66,12 @@ exports.registerUser = catchAsyncError(async (req, res, next) => {
   const data = await OTP.findOne({ email });
   if (!data || data.temporary_otp !== otp) {
     return next(new ErrorHandler("Invalid OTP", 400));
+  }
+  const currentTime = new Date();
+  const expirationTime = new Date(data.expiration_time);
+  if (expirationTime < currentTime) {
+    await OTP.deleteOne({ email });
+    return next(new ErrorHandler("OTP has expired", 400));
   }
   const user = await User.create({ email });
   await OTP.deleteOne({ email });
@@ -58,19 +85,31 @@ exports.registerUser = catchAsyncError(async (req, res, next) => {
 
 //login user - /api/v1/login
 exports.loginUser = catchAsyncError(async (req, res, next) => {
-  const { email, password } = req.body;
-  if (!email || !password) {
-    return next(new ErrorHandler("Please enter email & password", 400));
+  const { email, otp } = req.body;
+  if (!email) {
+    return next(new ErrorHandler("Please enter an email", 400));
   }
-  // finding the user database
-  const user = await User.findOne({ email }).select("+password");
+  const data = await OTP.findOne({ email });
+  const currentTime = new Date();
+  const expirationTime = new Date(data.expiration_time);
+  if (expirationTime < currentTime) {
+    await OTP.deleteOne({ email });
+    return next(new ErrorHandler("OTP has expired", 400));
+  }
+  if (!data || data.temporary_otp !== otp) {
+    return next(new ErrorHandler("Invalid OTP", 400));
+  }
+  const user = await User.findOne({ email });
   if (!user) {
-    return next(new ErrorHandler("Invalid email or password", 401));
+    return next(new ErrorHandler("User not found", 401));
   }
-  if (!(await user.isValidPassword(password))) {
-    return next(new ErrorHandler("Invalid email or password", 401));
-  }
-  sendToken(user, 201, res, "Logged in successfully!");
+  await OTP.deleteOne({ email });
+  res.status(200).json({
+    success: true,
+    message: "Logged In successfully",
+    code: "proceed-verify-success",
+    user,
+  });
 });
 
 // logout - /api/v1/logout

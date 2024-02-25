@@ -26,6 +26,7 @@
     "nodemailer": "^6.9.1",
     "randomstring": "^1.3.0",
     "stripe": "^11.11.0",
+    "twilio": "^4.22.0",
     "uuid": "^9.0.1",
     "validator": "^13.9.0"
   },
