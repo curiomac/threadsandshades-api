@@ -17,7 +17,7 @@ exports.sendOTP = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("Please enter an email", 400));
   }
   const user = await User.findOne({ email });
-  if (!user) {
+  if (!user && isAuth === "Login") {
     return next(new ErrorHandler("Email id not found", 404));
   }
   if (user && isAuth === "Register") {
