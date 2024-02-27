@@ -17,6 +17,9 @@ exports.sendOTP = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("Please enter an email", 400));
   }
   const user = await User.findOne({ email });
+  if (!user) {
+    return next(new ErrorHandler("Email id not found", 404));
+  }
   if (user && isAuth === "Register") {
     return next(new ErrorHandler("Email already registered", 400));
   }
@@ -181,13 +184,24 @@ exports.resetPassword = catchAsyncError(async (req, res, next) => {
   sendToken(user, 201, res, "Password updated successfully!");
 });
 
-// Get User Profile - /api/v1/myprofile
+// Get User Profile - /api/v1/profile/get/:id
 
 exports.getUserProfile = catchAsyncError(async (req, res, next) => {
-  const user = await User.findById(req.user.id);
+  const user_id = req.params.id
+  const user = await User.findById(user_id);
   res.status(200).json({
     success: true,
     user,
+  });
+});
+// Get User Profile Image - /api/v1/profile/image/get/:id
+
+exports.getUserProfileImage = catchAsyncError(async (req, res, next) => {
+  const user_id = req.params.id
+  const user = await User.findById(user_id);
+  res.status(200).json({
+    success: true,
+    avatar: user?.avatar,
   });
 });
 
@@ -197,7 +211,7 @@ exports.changePassword = catchAsyncError(async (req, res, next) => {
   const user = await User.findById(req.user.id).select("+password");
   //check old password
   if (!(await user.isValidPassword(req.body.old_password))) {
-    return next(new ErrorHandler("Old password is incorrect", 401));
+    return next(new ErrorHandler("Old password is incorrect", 400));
   }
   // asigning new password
   user.password = req.body.new_password;
@@ -207,31 +221,61 @@ exports.changePassword = catchAsyncError(async (req, res, next) => {
   });
 });
 
-//Update Profile
-
+//Update Profile - /api/v1/profile/update/:id
 exports.updateProfile = catchAsyncError(async (req, res, next) => {
-  const { name, email, phone_number, address, postal_code, password } =
-    req.body;
-  let newUserData = {
-    name,
-    email,
-    phone_number,
-    address,
-    postal_code,
-    password,
-  };
-  let avatar;
-  if (req.file) {
-    avatar = `${process.env.SERVER_URL}/uploads/user/${req.file.originalname}`;
-    newUserData = { ...newUserData, avatar };
+  const user_id = req.params.id;
+  const user_found = await User.findById(user_id)
+  if(!user_found) {
+    return next (new ErrorHandler("User not found", 404))
   }
-  const user = await User.findByIdAndUpdate(req.user.id, newUserData, {
+  const {
+    first_name,
+    last_name,
+    mobile_number,
+    alternate_mobile_number,
+    email,
+    gender,
+    date_of_birth,
+  } = req.body;
+  let newUserData = {
+    first_name,
+    last_name,
+    mobile_number,
+    alternate_mobile_number,
+    email,
+    gender,
+    date_of_birth,
+  };
+  const user = await User.findOneAndUpdate({_id: user_id}, {...newUserData}, {
     new: true,
-    runValidators: true,
+    // runValidators: true,
   });
+  console.log("user: ",user);
   res.status(200).json({
     success: true,
     user,
+  });
+});
+//Update Profile Image - /api/v1/profile/image/update/:id
+exports.updateProfileImage = catchAsyncError(async (req, res, next) => {
+  const user_id = req.params.id;
+  const user_found = await User.findById(user_id)
+  if(!user_found) {
+    return next (new ErrorHandler("User not found", 404))
+  }
+  let avatar;
+  if (req.file) {
+    console.log("req.file: ", req.file);
+    avatar = `${process.env.SERVER_URL}/uploads/user/${req.file.originalname}`;
+  }
+  const user = await User.findOneAndUpdate({_id: user_id}, {avatar}, {
+    new: true,
+    // runValidators: true,
+  });
+  console.log("user: ", user);
+  res.status(200).json({
+    success: true,
+    avatar: user.avatar,
   });
 });
 
