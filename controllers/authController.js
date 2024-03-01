@@ -27,6 +27,7 @@ exports.sendOTP = catchAsyncError(async (req, res, next) => {
     await OTP.deleteOne({ email });
   }
   const data = await OTP.findOne({ email });
+  console.log("log: ", data?.expiration_time < new Date());
   if (data) {
     return next(new ErrorHandler("OTP already sent", 400));
   }
@@ -36,7 +37,7 @@ exports.sendOTP = catchAsyncError(async (req, res, next) => {
   const verification_data = {
     email,
     temporary_otp: otp,
-    expiration_time: expirationTime,
+    expiration_time: new Date(expirationTime),
   };
   await OTP.create(verification_data);
 

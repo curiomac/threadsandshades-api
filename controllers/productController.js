@@ -43,10 +43,6 @@ exports.getProducts = catchAsyncError(async (req, res, next) => {
       ? Math.ceil(productsCount / resPerPage)
       : 1;
   const products = await buildQuery().paginate(resPerPage).query;
-
-  if (productsCount === 0) {
-    return next(new ErrorHandler("No products found", 404));
-  }
   const formated_products = await Promise.all(
     products.map(async (item) => {
       let update_product;
@@ -77,6 +73,30 @@ exports.getProducts = catchAsyncError(async (req, res, next) => {
       };
     })
   );
+  async function getAvailableFilters() {
+    try {
+      const targetColors = await Product.aggregate([
+        {
+          $group: {
+            _id: "$target_color",
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            target_color: "$_id",
+          },
+        },
+      ]);
+
+      return targetColors;
+    } catch (error) {
+      console.error("Error occurred:", error);
+    }
+  }
+
+  const filters_available = await getAvailableFilters();
+
   res.status(200).json({
     success: true,
     resPerPage,
@@ -84,6 +104,8 @@ exports.getProducts = catchAsyncError(async (req, res, next) => {
     totalPages,
     currentPage,
     products: formated_products,
+    filters_applied: req.query,
+    filters_available,
   });
 });
 // create product -/api/v1/products/create

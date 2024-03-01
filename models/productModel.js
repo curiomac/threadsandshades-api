@@ -78,7 +78,7 @@ const productSchema = new mongoose.Schema({
     required: [true, "Please enter discount price"],
   },
   fixed_price: {
-    type: String,
+    type: Number,
   },
   discount_start_date: {
     type: String,

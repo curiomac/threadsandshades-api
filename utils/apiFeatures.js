@@ -19,25 +19,22 @@ class APIFeatures {
     const excludedFields = ["keyword", "limit", "page"];
     let queryObj = { ...this.queryStr };
 
-    console.log("Original query object:", queryObj);
-
     excludedFields.forEach((el) => delete queryObj[el]);
 
     for (const [key, value] of Object.entries(queryObj)) {
-      if (key === "available_sizes" && typeof value === "string") {
-        console.log("Value:", value);
-        const sizesArray = value.split(",").map((size) => size.trim());
-        console.log("sizesArray: ", sizesArray);
-        queryObj[key] = { $all: sizesArray };
-      } else {
+       if (key === "available_sizes") {
+        const formated_size_array = value.split(',')
+        queryObj[key] = { $elemMatch: { $in: formated_size_array } };
+      } else if (key === "target_color") {
+        const formated_size_array = value.split(',')
+        queryObj[key] = { $in: formated_size_array };
+      } else if (key === "fixed_price") {
+        queryObj[key] = { $gte: value };
+      }else {
         queryObj[key] = { $eq: value };
       }
     }
-    console.log("Updated query object:", queryObj);
-
-    console.log("MongoDB Query:", this.query.getFilter());
     this.query.find(queryObj);
-
     return this;
   }
 
