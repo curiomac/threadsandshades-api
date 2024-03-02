@@ -1,0 +1,15 @@
+/* otp email template */
+
+.content-container {
+  border: 1px solid #909090;
+}
+.content-container .logo-container {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.content-container .logo-container .logo {
+  height: 50px;
+  width: 150px;
+}

@@ -3,12 +3,15 @@ const Product = require("../models/productModel");
 const ProductsGroup = require("../models/productsGroupModel");
 const ErrorHandler = require("../utils/errorHandler");
 const APIFeatures = require("../utils/apiFeatures");
+const moment = require("moment");
 
 // get product - /api/v1/product/:id
 exports.getProduct = catchAsyncError(async (req, res, next) => {
   const product_id = req.params.id;
   const product = await Product.findById(product_id);
-  const products_group = await ProductsGroup.findOne({ "group.products_group_id": product?.products_group_id });
+  const products_group = await ProductsGroup.findOne({
+    "group.products_group_id": product?.products_group_id,
+  });
   if (!product) {
     return next(new ErrorHandler("Product not found with this id", 404));
   }
@@ -18,7 +21,7 @@ exports.getProduct = catchAsyncError(async (req, res, next) => {
   res.status(200).json({
     success: true,
     product,
-    products_group
+    products_group,
   });
 });
 
@@ -40,19 +43,60 @@ exports.getProducts = catchAsyncError(async (req, res, next) => {
       ? Math.ceil(productsCount / resPerPage)
       : 1;
   const products = await buildQuery().paginate(resPerPage).query;
-  // console.log("products: ", products)
-  const formated_products = await Promise.all(products.map(async (product) => {
-    const products_group = await ProductsGroup.findOne({ "group.products_group_id": product?.products_group_id });
-    return {
-      ...product._doc,
-      group: products_group.group
-    };
-  }));
-  console.log("formated_products: ", formated_products)
+  const formated_products = await Promise.all(
+    products.map(async (item) => {
+      let update_product;
+      if (
+        item?.discount_start_date &&
+        item?.discount_end_date &&
+        moment(item.discount_start_date) <= moment(new Date()) &&
+        moment(item.discount_end_date) >= moment(new Date())
+      ) {
+        update_product = await Product.findByIdAndUpdate(
+          item._id,
+          { $set: { is_discounted_product: true } },
+          { new: true }
+        );
+      } else {
+        update_product = await Product.findByIdAndUpdate(
+          item._id,
+          { $set: { is_discounted_product: false } },
+          { new: true }
+        );
+      }
+      const products_group = await ProductsGroup.findOne({
+        "group.products_group_id": item?.products_group_id,
+      });
+      return {
+        ...update_product._doc,
+        group: products_group.group,
+      };
+    })
+  );
+  async function getAvailableFilters() {
+    try {
+      const targetColors = await Product.aggregate([
+        {
+          $group: {
+            _id: "$target_color",
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            target_color: "$_id",
+          },
+        },
+      ]);
 
-  if (productsCount === 0) {
-    return next(new ErrorHandler("No products found", 404));
+      return targetColors;
+    } catch (error) {
+      console.error("Error occurred:", error);
+    }
   }
+
+  const filters_available = await getAvailableFilters();
+
   res.status(200).json({
     success: true,
     resPerPage,
@@ -60,6 +104,8 @@ exports.getProducts = catchAsyncError(async (req, res, next) => {
     totalPages,
     currentPage,
     products: formated_products,
+    filters_applied: req.query,
+    filters_available,
   });
 });
 // create product -/api/v1/products/create
@@ -80,10 +126,6 @@ exports.createProduct = catchAsyncError(async (req, res, next) => {
   const isValidDiscountPrice = () => {
     const discountMargin = discount_percentage / 100;
     const discountPriceAmount = sale_price * discountMargin;
-    console.log(
-      Number(discountPriceAmount).toFixed(2),
-      Number(discount_price).toFixed(2)
-    );
     return (
       Number(discountPriceAmount).toFixed(2) ===
       Number(discount_price).toFixed(2)

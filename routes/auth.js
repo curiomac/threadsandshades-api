@@ -9,10 +9,13 @@ const { registerUser,
         getUserProfile,
         changePassword,
         updateProfile,
+        updateProfileImage,
         getAllUsers,
         getUser,
         updateUser,
-        deleteUser } = require('../controllers/authController');
+        deleteUser, 
+        sendOTP,
+        getUserProfileImage} = require('../controllers/authController');
 const router = express.Router();
 const { isAuthenticatedUser, authorizeRoles } = require('../middlewares/authenticate');
 const upload = multer({
@@ -26,14 +29,21 @@ const upload = multer({
         })
 })
 
-router.route('/register').post(upload.single('avatar'), registerUser);
+router.route('/otp/send').post(sendOTP);
+router.route('/register').post(registerUser);
 router.route('/login').post(loginUser);
 router.route('/logout').get(logoutUser);
 router.route('/password/forgot').post(forgotPassword);
 router.route('/password/reset/:token').post(resetPassword);
-router.route('/myprofile').get(getUserProfile);
+router.route('/profile/get/:id').get(getUserProfile);
+router.route('/profile/image/get/:id').get(getUserProfileImage);
 router.route('/password/change').put(isAuthenticatedUser, changePassword);
-router.route('/profile/update').put(isAuthenticatedUser, upload.single('avatar'), updateProfile);
+router.route('/profile/update/:id').put(
+        // isAuthenticatedUser, 
+        updateProfile);
+router.route('/profile/image/update/:id').put(
+        // isAuthenticatedUser, 
+        upload.single('avatar'), updateProfileImage);
 //Admin routes
 router.route('/admin/users').get(isAuthenticatedUser, authorizeRoles('admin'), getAllUsers);
 router.route('/admin/user/:id')

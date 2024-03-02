@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const productSchema = new mongoose.Schema({
   products_group_id: {
     type: String,
-    required: [true, "Please enter the product group id"]
+    required: [true, "Please enter the product group id"],
   },
   product_title: {
     type: String,
@@ -78,7 +78,7 @@ const productSchema = new mongoose.Schema({
     required: [true, "Please enter discount price"],
   },
   fixed_price: {
-    type: String,
+    type: Number,
   },
   discount_start_date: {
     type: String,
@@ -87,6 +87,10 @@ const productSchema = new mongoose.Schema({
   discount_end_date: {
     type: String,
     required: [true, "Please enter discount end date"],
+  },
+  is_discounted_product: {
+    type: Boolean,
+    default: false,
   },
   return_days: {
     type: String,

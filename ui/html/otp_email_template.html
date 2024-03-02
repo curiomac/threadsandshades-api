@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OTP Verification</title>
+    <link rel="stylesheet" type="text/css" href="../css/styles.css" />
+    <link
+      href="https://fonts.googleapis.com/css?family=Poppins"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body style="margin: 0">
+    <div
+      style="
+        height: 100%;
+        letter-spacing: 1px;
+        text-align: center;
+        background-color: #8b8b8b52;
+        padding: 20px;
+      "
+    >
+      <div
+        style="
+          margin: 0 auto;
+          font-family: Arial, sans-serif;
+          padding: 20px;
+          background: linear-gradient(to bottom, #ffcc00, #fe2d5a);
+          border: 6px solid #3c4351;
+          border-radius: 10px;
+          box-shadow: 0 0 10px 1px rgba(0, 0, 0, 0.45);
+        "
+      >
+        <div style="width: 150px; margin: 0 auto">
+          <img
+            src="https://live.staticflickr.com/65535/53542155342_c346897b5e_c.jpg"
+            style="height: 50px; width: 150px; border-radius: 8px; box-shadow: 0 0 10px 1px rgba(0, 0, 0, 0.45);"
+            alt="logo"
+          />
+        </div>
+        <div
+          style="
+            text-align: center;
+            color: #000000;
+            font-size: 20px;
+            font-weight: 600;
+            margin: 10px;
+            text-transform: uppercase;
+          "
+        >
+        {{ greet }}
+        </div>
+        <div
+          style="
+            font-size: 22px;
+            line-height: 1.6;
+            color: #fff;
+            font-size: 40px;
+            font-weight: 600;
+            letter-spacing: 3px;
+          "
+        >
+          {{ otp }}
+        </div>
+        <p style="font-size: 16px; color: #fff; 
+        line-height: 1.6;">
+          Please use the above OTP to complete your registration process.
+        </p>
+        <p style="font-size: 16px; line-height: 1.6; color: #fff">
+          If you did not request this OTP, you can safely ignore this email.
+        </p>
+        <p style="font-size: 16px; line-height: 1.6; color: #fff">Thank you!</p>
+      </div>
+    </div>
+  </body>
+</html>
