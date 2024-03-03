@@ -26,6 +26,43 @@ exports.getCartItems = catchAsyncError(async (req, res, next) => {
     },
   });
 });
+// get temporary cart items - /api/v1/temp/cart
+exports.getTemporaryCartItems = catchAsyncError(async (req, res, next) => {
+  const { cart_details } = req.body;
+  let remove_product_ids = []
+  const cart_items_res = await Promise.all(
+    cart_details.map(async (item) => {
+      const found_product = await Product.findById(item.product_id);
+      if (found_product) {
+        const { selected_color, selected_size, selected_color_code } =
+          item.selected_product_details;
+        if (
+          found_product.target_color === selected_color &&
+          found_product.target_color_code === selected_color_code &&
+          found_product.available_sizes.some(available_size => available_size === selected_size)
+        ) {
+          return {
+            selected_product_details: item.selected_product_details,
+            product: found_product,
+          };
+        } else {
+          remove_product_ids = [...remove_product_ids, found_product._id]
+        }
+      } else {
+        remove_product_ids = [...remove_product_ids, item.product_id]
+      }
+    })
+  );
+  const filtered_cart_items_res = cart_items_res.filter(item => item !== undefined);
+  res.status(200).json({
+    success: true,
+    cart: {
+      cart_items: filtered_cart_items_res,
+      cart_count: filtered_cart_items_res ? filtered_cart_items_res.length : 0,
+    },
+    remove_product_ids
+  });
+});
 
 // add cart - /api/v1/cart/add
 exports.addCart = catchAsyncError(async (req, res, next) => {
@@ -80,7 +117,7 @@ exports.addCart = catchAsyncError(async (req, res, next) => {
       };
     })
   );
-  
+
   res.status(200).json({
     success: true,
     cart: {
