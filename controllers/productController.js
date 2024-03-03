@@ -73,7 +73,7 @@ exports.getProducts = catchAsyncError(async (req, res, next) => {
       };
     })
   );
-  async function getAvailableFilters() {
+  const getAvailableFilters = async () => {
     try {
       const targetColors = await Product.aggregate([
         {
@@ -93,7 +93,7 @@ exports.getProducts = catchAsyncError(async (req, res, next) => {
     } catch (error) {
       console.error("Error occurred:", error);
     }
-  }
+  };
 
   const filters_available = await getAvailableFilters();
 

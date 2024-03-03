@@ -3,18 +3,30 @@ class APIFeatures {
     this.query = query;
     this.queryStr = queryStr;
   }
+
   search() {
-    let keyword = this.queryStr.keyword
-      ? {
-          name: {
-            $regex: this.queryStr.keyword,
-            $options: "i",
-          },
-        }
-      : {};
-    this.query.find({ ...keyword });
+    const stopwords = ['for', 'as', 'in', 'of'];
+    let keywords = this.queryStr.keyword ? this.queryStr.keyword.split(',') : [];
+    keywords = keywords.filter(keyword => !stopwords.includes(keyword.trim()));
+    for (let i = keywords.length; i > 0; i--) {
+      const subsetKeywords = keywords.slice(0, i);
+      const keywordCriteria = {
+        product_tags: {
+          $all: subsetKeywords.map(keyword => new RegExp(keyword.trim(), 'i')),
+        },
+      };
+      const searchResult = this.query.find(keywordCriteria);
+      if (searchResult.length > 0) {
+        break;
+      }
+    }
+  
     return this;
   }
+  
+  
+  
+  
   filter() {
     const excludedFields = ["keyword", "limit", "page"];
     let queryObj = { ...this.queryStr };
