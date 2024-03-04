@@ -22,10 +22,7 @@ class APIFeatures {
     }
   
     return this;
-  }
-  
-  
-  
+  }  
   
   filter() {
     const excludedFields = ["keyword", "limit", "page"];

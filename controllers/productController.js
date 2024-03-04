@@ -73,6 +73,7 @@ exports.getProducts = catchAsyncError(async (req, res, next) => {
       };
     })
   );
+
   const getAvailableFilters = async () => {
     try {
       const targetColors = await Product.aggregate([
