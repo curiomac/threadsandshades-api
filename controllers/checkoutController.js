@@ -12,6 +12,9 @@ exports.getCheckoutDetails = catchAsyncError(async (req, res, next) => {
   if (!user_id) {
     return next(new ErrorHandler("Please provide the user id"));
   }
+  if (user_id === "undefined" || user_id === undefined) {
+    return next(new ErrorHandler("Please provide a valid user id"));
+  }
   const user = await User.findById(user_id);
   if (!user) {
     return next(new Error("User not found"));
@@ -118,6 +121,83 @@ exports.getCheckoutDetails = catchAsyncError(async (req, res, next) => {
       coupon_discount,
       coupon_applied: coupon_applied,
       coupon_code: coupon_applied ? coupon_code : "",
+    },
+  });
+});
+exports.getTempCheckoutDetails = catchAsyncError(async (req, res, next) => {
+  const { cart_details } = req.body;
+  let remove_product_ids = []
+  const cart_items_res = await Promise.all(
+    cart_details.map(async (item) => {
+      const found_product = await Product.findById(item.product_id);
+      if (found_product) {
+        const { selected_color, selected_size, selected_color_code } =
+          item.selected_product_details;
+        if (
+          found_product.target_color === selected_color &&
+          found_product.target_color_code === selected_color_code &&
+          found_product.available_sizes.some(available_size => available_size === selected_size)
+        ) {
+          return {
+            ...found_product?._doc,
+            selected_product_details: item.selected_product_details,
+          };
+        } else {
+          remove_product_ids = [...remove_product_ids, found_product._id]
+        }
+      } else {
+        remove_product_ids = [...remove_product_ids, item.product_id]
+      }
+    })
+  );
+  const cartItems = cart_items_res.filter(item => item !== undefined);
+  const cartItemsProducts = await Promise.all(
+    cartItems.map(async (item) => {
+      const foundProduct = await Product.findById(item._id);
+      return {
+        selected_product_details: item.selected_product_details,
+        product: foundProduct,
+      };
+    })
+  );
+  const totalMRP = cartItemsProducts.reduce((acc, item) => {
+    return acc + parseFloat(item.product.fixed_price);
+  }, 0);
+
+  const DISCOUNT_DELIVERY_CHARGE = 500;
+  const shippingCharges = cartItemsProducts.map((cartItemProduct) => {
+    return {
+      delivery_charge: cartItemProduct.product.delivery_within_state,
+    };
+  });
+
+  const calculatedDeliveryCharge = shippingCharges.reduce(
+    (acc, item) => {
+      const charge = parseFloat(item.delivery_charge);
+      const max = acc.cost;
+      const discountedCharge =
+        totalMRP >= DISCOUNT_DELIVERY_CHARGE ? 0 : charge;
+      return {
+        cost: charge > max ? charge : max,
+        discounted_delivery_charge: discountedCharge,
+      };
+    },
+    { cost: 0, discounted_delivery_charge: 0 }
+  );
+  const cartTotal =
+    totalMRP + calculatedDeliveryCharge.discounted_delivery_charge;
+
+  res.status(200).json({
+    success: true,
+    checkout_details: {
+      total_mrp: totalMRP,
+      shipping_charge: calculatedDeliveryCharge.cost,
+      discounted_delivery_charge:
+        calculatedDeliveryCharge.discounted_delivery_charge,
+      cart_total: cartTotal,
+      coupon_discount: 0,
+      coupon_applied: false,
+      coupon_code: "",
     },
   });
 });
