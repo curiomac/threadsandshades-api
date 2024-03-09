@@ -9,7 +9,7 @@ const readHTMLTemplate = (templateName, replacements) => {
       value
     );
   }
-
+console.log("template: ", template);
   return template;
 };
 

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Order Details</title>
+    <link rel="stylesheet" type="text/css" href="../css/styles.css" />
+    <link
+      href="https://fonts.googleapis.com/css?family=Poppins"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body style="margin: 0">
+    <div
+      style="
+        height: 100%;
+        letter-spacing: 1px;
+        background-color: #8b8b8b52;
+        padding: 20px;
+      "
+    >
+      <div
+        style="
+          margin: 0 auto;
+          font-family: Arial, sans-serif;
+          padding: 20px;
+          background: #fff;
+          border: 6px solid #3c4351;
+          border-radius: 10px;
+          box-shadow: 0 0 10px 1px rgba(0, 0, 0, 0.45);
+        "
+      >
+        <div style="width: 150px; margin: 0 auto">
+          <img
+            src="https://live.staticflickr.com/65535/53542155342_c346897b5e_c.jpg"
+            style="
+              height: 50px;
+              width: 150px;
+              border-radius: 8px;
+              box-shadow: 0 0 10px 1px rgba(0, 0, 0, 0.45);
+            "
+            alt="logo"
+          />
+        </div>
+        <div
+          style="
+            text-align: center;
+            color: #000000;
+            font-size: 20px;
+            font-weight: 600;
+            margin: 10px;
+            text-transform: uppercase;
+          "
+        >
+          {{ greet }}
+        </div>
+        <div style="font-size: 18px;margin-top: 20px">
+          <strong> Dear {{ customer_name }}, </strong>
+        </div>
+        <div style="margin-top: 10px; margin-bottom: 20px">
+          Thank you for your recent purchase from Threads & Shades! We are
+          thrilled to have you as our customer. Below is a summary of your
+          order:
+        </div>
+        <strong style="font-size: 20px; color: red; width: 100%"
+          >Order Details</strong
+        >
+        <div style="margin-top: 10px; margin-bottom: 10px">
+          <strong
+            style="
+              color: red;
+              margin-top: 10px;
+              margin-bottom: 10px;
+              text-decoration: underline;
+            "
+          >
+            Order#{{ order_id }}
+          </strong>
+        </div>
+        {{ order_summary }}
+        <div style="margin-bottom: 20px; margin-top: 20px; width: 100%">
+          <div>Payment Method: {{ payment_method }}</div>
+        </div>
+        <strong style="font-size: 20px; color: red">Customer Details</strong>
+        <ul>
+          <li>Email: sambinudickson05@gmail.com</li>
+          <li>Mobile: 9384109664</li>
+        </ul>
+        <strong style="font-size: 20px; color: red">Delivery Details</strong>
+        <ul>
+          <li>Estimated Delivery Date: {{ estimated_delivery }}</li>
+          <li>Courier Service: NA</li>
+          <li>Tracking Number: NA</li>
+        </ul>
+        <div>
+          If you have any questions or concerns regarding your order, please
+          don't hesitate to contact us at support@threadsandshades.com. Our
+          customer support team is here to assist you.
+        </div>
+        <div style="margin-top: 10px">
+          Thank you for choosing Threads & Shades. We appreciate your business
+          and hope you enjoy your purchase!
+        </div>
+        <div style="margin-top: 20px">Best regards,</div>
+        <div style="margin-top: 10px">Radhika, CEO & Managing Director</div>
+        <div>Threads & Shades</div>
+        <center style="margin-top: 20px">
+          © 2024 Threads and Shades. All rights reserved
+        </center>
+      </div>
+    </div>
+  </body>
+</html>

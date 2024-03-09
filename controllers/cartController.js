@@ -8,8 +8,11 @@ const mongoose = require("mongoose");
 // get cart items - /api/v1/cart/:id
 exports.getCartItems = catchAsyncError(async (req, res, next) => {
   const user_id = req.params.id;
+
   const cart = await Cart.findOne({ user_id });
-  const cart_items_res = await Promise.all(
+  let cart_items_res = []
+  if(cart) {
+    cart_items_res = await Promise.all(
     cart?.cart_items.map(async (item) => {
       const found_product = await Product.findById(item.product_id);
       return {
@@ -18,6 +21,7 @@ exports.getCartItems = catchAsyncError(async (req, res, next) => {
       };
     })
   );
+  }
   res.status(200).json({
     success: true,
     cart: {
