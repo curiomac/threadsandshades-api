@@ -8,6 +8,7 @@ const otpGenerator = require("../utils/otpGenerator");
 const crypto = require("crypto");
 const readHTMLTemplate = require("../utils/readHTMLTemplate");
 const path = require("path");
+const moment = require("moment");
 
 // send otp - /api/v1/otp/send
 exports.sendOTP = catchAsyncError(async (req, res, next) => {
@@ -27,8 +28,13 @@ exports.sendOTP = catchAsyncError(async (req, res, next) => {
     await OTP.deleteOne({ email });
   }
   const data = await OTP.findOne({ email });
-  console.log("log: ", data?.expiration_time < new Date());
-  if (data) {
+  const expiry_date = moment(data?.expiration_time).format("DD-MM-YYYY");
+  const current_date = moment(new Date()).format("DD-MM-YYYY");
+  if (expiry_date < current_date) {
+    await OTP.findOneAndDelete({ email });
+  }
+  const found_otp_data = await OTP.findOne({ email });
+  if (found_otp_data) {
     return next(new ErrorHandler("OTP already sent", 400));
   }
   const otp = otpGenerator();
@@ -188,7 +194,7 @@ exports.resetPassword = catchAsyncError(async (req, res, next) => {
 // Get User Profile - /api/v1/profile/get/:id
 
 exports.getUserProfile = catchAsyncError(async (req, res, next) => {
-  const user_id = req.params.id
+  const user_id = req.params.id;
   const user = await User.findById(user_id);
   res.status(200).json({
     success: true,
@@ -198,7 +204,7 @@ exports.getUserProfile = catchAsyncError(async (req, res, next) => {
 // Get User Profile Image - /api/v1/profile/image/get/:id
 
 exports.getUserProfileImage = catchAsyncError(async (req, res, next) => {
-  const user_id = req.params.id
+  const user_id = req.params.id;
   const user = await User.findById(user_id);
   res.status(200).json({
     success: true,
@@ -225,9 +231,9 @@ exports.changePassword = catchAsyncError(async (req, res, next) => {
 //Update Profile - /api/v1/profile/update/:id
 exports.updateProfile = catchAsyncError(async (req, res, next) => {
   const user_id = req.params.id;
-  const user_found = await User.findById(user_id)
-  if(!user_found) {
-    return next (new ErrorHandler("User not found", 404))
+  const user_found = await User.findById(user_id);
+  if (!user_found) {
+    return next(new ErrorHandler("User not found", 404));
   }
   const {
     first_name,
@@ -247,11 +253,15 @@ exports.updateProfile = catchAsyncError(async (req, res, next) => {
     gender,
     date_of_birth,
   };
-  const user = await User.findOneAndUpdate({_id: user_id}, {...newUserData}, {
-    new: true,
-    // runValidators: true,
-  });
-  console.log("user: ",user);
+  const user = await User.findOneAndUpdate(
+    { _id: user_id },
+    { ...newUserData },
+    {
+      new: true,
+      // runValidators: true,
+    }
+  );
+  console.log("user: ", user);
   res.status(200).json({
     success: true,
     user,
@@ -260,19 +270,23 @@ exports.updateProfile = catchAsyncError(async (req, res, next) => {
 //Update Profile Image - /api/v1/profile/image/update/:id
 exports.updateProfileImage = catchAsyncError(async (req, res, next) => {
   const user_id = req.params.id;
-  const user_found = await User.findById(user_id)
-  if(!user_found) {
-    return next (new ErrorHandler("User not found", 404))
+  const user_found = await User.findById(user_id);
+  if (!user_found) {
+    return next(new ErrorHandler("User not found", 404));
   }
   let avatar;
   if (req.file) {
     console.log("req.file: ", req.file);
     avatar = `${process.env.SERVER_URL}/uploads/user/${req.file.originalname}`;
   }
-  const user = await User.findOneAndUpdate({_id: user_id}, {avatar}, {
-    new: true,
-    // runValidators: true,
-  });
+  const user = await User.findOneAndUpdate(
+    { _id: user_id },
+    { avatar },
+    {
+      new: true,
+      // runValidators: true,
+    }
+  );
   console.log("user: ", user);
   res.status(200).json({
     success: true,
