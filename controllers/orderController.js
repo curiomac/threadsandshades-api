@@ -20,11 +20,24 @@ exports.createOrder = catchAsyncError(async (req, res, next) => {
   const email = user_found?.email;
   let products = [];
   const order_items = await Promise.all(
-    order_data?.product_ids?.map(async (product_id) => {
-      const found_product = await Product.findById(product_id);
+    order_data?.products?.map(async (product) => {
+      const found_product = await Product.findById(product.product_id);
       products = [...products, { ...found_product._doc }];
       return {
         product_id: found_product?._id,
+        product_images: found_product?.product_images,
+        sale_price: found_product?.sale_price,
+        discount_percentage: found_product?.discount_percentage,
+        discount_price: found_product?.discount_price,
+        fixed_price: found_product?.fixed_price,
+        product_title: found_product?.product_title,
+        product_label: found_product?.product_label,
+        target_color: found_product?.target_color,
+        target_color_code: found_product?.target_color_code,
+        selected_color: product?.selected_color,
+        selected_color_code: product?.selected_color_code,
+        selected_quantity: product?.selected_quantity,
+        selected_size: product?.selected_size,
       };
     })
   );
@@ -169,13 +182,7 @@ exports.createOrder = catchAsyncError(async (req, res, next) => {
     message: htmlTemplate,
   });
   await Cart.findOneAndDelete({ user_id });
-  const order_items_res = await Promise.all(
-    order?.order_items.map(async (item) => {
-      const found_product = await Product.findById(item.product_id);
-      return { ...found_product?._doc };
-    })
-  );
-  const order_res = { ...order?._doc, order_items_res };
+  const order_res = { ...order?._doc, _id: hashed_order_id };
   res.status(200).json({
     success: true,
     order: order_res,
@@ -190,44 +197,24 @@ exports.getOrder = catchAsyncError(async (req, res, next) => {
   if (!order) {
     return next(new ErrorHandler("Order not found with this id", 404));
   }
-  const order_items = await Promise.all(
-    order?.order_items.map(async (item) => {
-      const found_product = await Product.findById(item.product_id);
-      return { ...found_product?._doc };
-    })
-  );
-  const order_res = { ...order?._doc, order_items };
   res.status(200).json({
     success: true,
-    order: order_res,
+    order,
   });
 });
 
 // get orders - /api/v1/orders/:id
 exports.getOrders = catchAsyncError(async (req, res, next) => {
   const user_id = req.params.id;
-  const orders = await Order.find({ user_id });
-
-  if (!orders || orders.length === 0) {
-    return next(new ErrorHandler("Order not found with this id", 404));
+  const user = await User.findById(user_id);
+  if (!user) {
+    return next(new ErrorHandler("User not found with this id", 404));
   }
 
-  const orders_items = await Promise.all(
-    orders.map(async (order) => {
-      const ordered_products = await Promise.all(
-        order.order_items.map(async (item) => {
-          console.log("item: ", item);
-          const found_product = await Product.findById(item.product_id);
-          return { ...found_product?._doc };
-        })
-      );
-      const order_res = { ...order?._doc, order_items: ordered_products };
-      return order_res;
-    })
-  );
+  const orders = await Order.find({ user_id }).sort({ createdAt: 'desc' });
 
   res.status(200).json({
     success: true,
-    orders: orders_items,
+    orders,
   });
 });

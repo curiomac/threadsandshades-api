@@ -10,18 +10,24 @@ exports.getCartItems = catchAsyncError(async (req, res, next) => {
   const user_id = req.params.id;
 
   const cart = await Cart.findOne({ user_id });
-  let cart_items_res = []
-  if(cart) {
+  let cart_items_res = [];
+  if (cart) {
     cart_items_res = await Promise.all(
-    cart?.cart_items.map(async (item) => {
-      const found_product = await Product.findById(item.product_id);
-      return {
-        selected_product_details: item.selected_product_details,
-        product: found_product,
-      };
-    })
-  );
+      cart?.cart_items.map(async (item) => {
+        const found_product = await Product.findById(item.product_id);
+        return {
+          selected_product_details: item.selected_product_details,
+          product: found_product,
+          createdAt: item?.createdAt,
+        };
+      })
+    );
   }
+  cart_items_res.sort((a, b) => {
+    const dateA = new Date(a.createdAt);
+    const dateB = new Date(b.createdAt);
+    return dateB - dateA;
+  });
   res.status(200).json({
     success: true,
     cart: {
@@ -59,9 +65,14 @@ exports.getTemporaryCartItems = catchAsyncError(async (req, res, next) => {
       }
     })
   );
-  const filtered_cart_items_res = cart_items_res.filter(
+  let filtered_cart_items_res = cart_items_res.filter(
     (item) => item !== undefined
   );
+  filtered_cart_items_res.sort((a, b) => {
+    const dateA = new Date(a.createdAt);
+    const dateB = new Date(b.createdAt);
+    return dateB - dateA;
+  });
   res.status(200).json({
     success: true,
     cart: {
@@ -81,11 +92,13 @@ exports.addCart = catchAsyncError(async (req, res, next) => {
     selected_color_code,
     selected_size,
     selected_quantity,
+    qty,
   } = req.body;
   const [user, product] = await Promise.all([
     User.findById(user_id),
     Product.findById(product_id),
   ]);
+  const productId = mongoose.Types.ObjectId(product_id);
   if (!user) {
     return next(new Error("User not found"));
   }
@@ -101,36 +114,108 @@ exports.addCart = catchAsyncError(async (req, res, next) => {
     selected_size,
     selected_quantity,
   };
-  let cart = await Cart.findOneAndUpdate(
-    { user_id },
-    {
-      $addToSet: {
-        cart_items: { product_id: product._id, selected_product_details },
-      },
-    },
-    { new: true }
-  );
-  if (!cart) {
-    cart = await Cart.create({
+  const cart = await Cart.findOne({ user_id });
+  let cart_res = {};
+  if (cart) {
+    const cart_product_exist = cart.cart_items.find(
+      (cart_item) => cart_item.product_id.toString() === product_id
+    );
+    if (cart_product_exist) {
+      // If product already found with the same user id in the cart, case updating the quantity;
+      const productIndex = cart.cart_items.findIndex((item) =>
+        item.product_id.equals(productId)
+      );
+      if (productIndex === -1) {
+        return res
+          .status(500)
+          .json({ success: false, message: "Oops! Error occured!" });
+      }
+      cart.cart_items.splice(productIndex, 1);
+      await cart.save();
+      // Proccess for updating the quantity;
+      let updated_selected_quantity;
+      if (qty === "negative") {
+        updated_selected_quantity =
+          cart_product_exist?.selected_product_details?.selected_quantity -
+          selected_quantity;
+      } else {
+        updated_selected_quantity =
+          selected_quantity +
+          cart_product_exist?.selected_product_details?.selected_quantity;
+      }
+      const updated_selected_product_details = {
+        ...selected_product_details,
+        selected_quantity: updated_selected_quantity,
+      };
+      if (updated_selected_quantity > 0) {
+        cart_res = await Cart.findOneAndUpdate(
+          { user_id },
+          {
+            $addToSet: {
+              cart_items: {
+                product_id: product._id,
+                selected_product_details: updated_selected_product_details,
+                createdAt: cart_product_exist?.createdAt,
+              },
+            },
+          },
+          { new: true }
+        );
+      } else {
+        cart_res = await Cart.findOne({ user_id });
+      }
+    } else {
+      cart_res = await Cart.findOneAndUpdate(
+        { user_id },
+        {
+          $addToSet: {
+            cart_items: {
+              product_id: product._id,
+              selected_product_details,
+              createdAt: new Date(),
+            },
+          },
+        },
+        { new: true }
+      );
+    }
+  } else {
+    cart_res = await Cart.create({
       user_id,
-      cart_items: [{ product_id: product._id, selected_product_details }],
+      cart_items: [
+        {
+          product_id: product._id,
+          selected_product_details,
+          createdAt: new Date(),
+        },
+      ],
     });
   }
-  const cart_items_res = await Promise.all(
-    cart.cart_items.map(async (item) => {
+  console.log("cart_res: ", cart_res)
+  let cart_items_res = await Promise.all(
+    cart_res.cart_items.map(async (item) => {
       const found_product = await Product.findById(item.product_id);
+      console.log("item: ", item);
       return {
-        selected_product_details: item.selected_product_details,
+        selected_product_details: item?.selected_product_details,
         product: found_product,
+        createdAt: item?.createdAt,
       };
     })
   );
+  console.log("cart_items_res: ", cart_items_res);
+  // Sort cart_items_res by the dateCreated property of the products
+  cart_items_res.sort((a, b) => {
+    const dateA = new Date(a.createdAt);
+    const dateB = new Date(b.createdAt);
+    return dateB - dateA;
+  });
 
   res.status(200).json({
     success: true,
     cart: {
       cart_items: cart_items_res,
-      cart_count: cart ? cart.cart_items.length : 0,
+      cart_count: cart_res ? cart_res.cart_items.length : 0,
     },
   });
 });

@@ -38,7 +38,13 @@ exports.getCheckoutDetails = catchAsyncError(async (req, res, next) => {
   );
 
   const totalMRP = cartItemsProducts.reduce((acc, item) => {
-    return acc + parseFloat(item.product.fixed_price);
+    return (
+      acc +
+      parseFloat(
+        item?.product.fixed_price *
+          item?.selected_product_details?.selected_quantity
+      )
+    );
   }, 0);
 
   const DISCOUNT_DELIVERY_CHARGE = 500;
@@ -126,7 +132,7 @@ exports.getCheckoutDetails = catchAsyncError(async (req, res, next) => {
 });
 exports.getTempCheckoutDetails = catchAsyncError(async (req, res, next) => {
   const { cart_details } = req.body;
-  let remove_product_ids = []
+  let remove_product_ids = [];
   const cart_items_res = await Promise.all(
     cart_details.map(async (item) => {
       const found_product = await Product.findById(item.product_id);
@@ -136,21 +142,23 @@ exports.getTempCheckoutDetails = catchAsyncError(async (req, res, next) => {
         if (
           found_product.target_color === selected_color &&
           found_product.target_color_code === selected_color_code &&
-          found_product.available_sizes.some(available_size => available_size === selected_size)
+          found_product.available_sizes.some(
+            (available_size) => available_size === selected_size
+          )
         ) {
           return {
             ...found_product?._doc,
             selected_product_details: item.selected_product_details,
           };
         } else {
-          remove_product_ids = [...remove_product_ids, found_product._id]
+          remove_product_ids = [...remove_product_ids, found_product._id];
         }
       } else {
-        remove_product_ids = [...remove_product_ids, item.product_id]
+        remove_product_ids = [...remove_product_ids, item.product_id];
       }
     })
   );
-  const cartItems = cart_items_res.filter(item => item !== undefined);
+  const cartItems = cart_items_res.filter((item) => item !== undefined);
   const cartItemsProducts = await Promise.all(
     cartItems.map(async (item) => {
       const foundProduct = await Product.findById(item._id);
