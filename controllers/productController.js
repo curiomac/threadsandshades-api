@@ -3,6 +3,7 @@ const Product = require("../models/productModel");
 const ProductsGroup = require("../models/productsGroupModel");
 const ErrorHandler = require("../utils/errorHandler");
 const APIFeatures = require("../utils/apiFeatures");
+const Ratings = require("../models/ratingsModel");
 const moment = require("moment");
 
 // get product - /api/v1/product/:id
@@ -67,9 +68,11 @@ exports.getProducts = catchAsyncError(async (req, res, next) => {
       const products_group = await ProductsGroup.findOne({
         "group.products_group_id": item?.products_group_id,
       });
+      const product_ratings = await Ratings.findOne({product_id: item._id})
       return {
         ...update_product._doc,
         group: products_group.group,
+        ratings: product_ratings
       };
     })
   );
