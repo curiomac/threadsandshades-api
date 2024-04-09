@@ -190,6 +190,73 @@ exports.createOrder = catchAsyncError(async (req, res, next) => {
   });
 });
 
+// update order status - /api/v1/order-status
+exports.updateOrderStaus = catchAsyncError(async (req, res, next) => {
+  const { order_id, status } = req.body
+  /* Checking for order */
+  if (!order_id || !status) {
+    return next(new ErrorHandler("All the fields are required", 400));
+  }
+  /* Verifing order from the order id  */
+  const order = await Order.findById(order_id);
+  if (!order) {
+    return next(new ErrorHandler("Order not found with this id", 404));
+  }
+  let order_res = order;
+  /* Updating order status */
+  switch (status) {
+    case ('shipped'): {
+      /* Preventing updating duplicate status */
+      if(order?.order_status === 'shipped') {
+        return next(new ErrorHandler(`Current order status is already in ${order?.order_status} state`, 400));
+      }
+      /* Preventing updating to previous status */
+      if (order?.order_status === 'delivered' || order?.order_status === 'canceled') {
+        return next(new ErrorHandler("Updating order status to previous status is restricted", 400));
+      }
+      order_res = await Order.findOneAndUpdate(
+        { _id: order_id },
+        { order_status: status },
+        { new: true }
+      );
+      break;
+    }
+    case ('delivered'): {
+      /* Preventing updating duplicate status */
+      if(order?.order_status === 'delivered') {
+        return next(new ErrorHandler(`Current order status is already in ${order?.order_status} state`, 400));
+      }
+      /* Preventing updating to previous status */
+      if (order?.order_status === 'canceled') {
+        return next(new ErrorHandler("Updating order status to previous state is restricted", 400));
+      }
+      await Promise.all(
+        order?.order_items?.map(async (product) => {
+          const found_product = await Product.findById(product.product_id);
+          if (found_product && !found_product.verified_purchase_users.some(user => user.user_id === order.user_id)) {
+            await Product.findOneAndUpdate(
+              { _id: product.product_id },
+              { $addToSet: { verified_purchase_users: { order_id, user_id: order.user_id } } }
+            );
+          }
+        })
+      );
+      order_res = await Order.findOneAndUpdate(
+        { _id: order_id },
+        { order_status: status },
+        { new: true }
+      );
+      break;
+    }
+    default: {
+      return next(new ErrorHandler("Internal server error", 500));
+    }
+  }
+  res.status(200).json({
+    success: true,
+    order: order_res,
+  });
+})
 // get order - /api/v1/order/:id
 exports.getOrder = catchAsyncError(async (req, res, next) => {
   const order_id = req.params.id;

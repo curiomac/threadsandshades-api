@@ -37,6 +37,11 @@ exports.createRating = catchAsyncError(async (req, res, next) => {
   if (!product) {
     return next(new ErrorHandler("Product not found with this id", 404));
   }
+  /* Verifing for purchased user from the user id */
+  const verified_user = product.verified_purchase_users.some(user => user.user_id === user_id)
+  if(!verified_user) {
+    return next(new ErrorHandler("Action restricted", 400));
+  }
   /* Checking for product ratings */
   const ratings_found = await Ratings.findOne({ product_id: productId });
   let rating;
@@ -89,6 +94,7 @@ exports.createRating = catchAsyncError(async (req, res, next) => {
     };
     rating = await Ratings.create(payload);
   }
+  /* Formating response for ratings (Only if ratings found) */
   const formatted_ratings = await Promise.all(
     rating.reviews.map(async (item) => {
       console.log("item: ", item);
@@ -102,7 +108,7 @@ exports.createRating = catchAsyncError(async (req, res, next) => {
   );
   res.status(200).json({
     success: true,
-    ratings: { ...ratings_found._doc, reviews: formatted_ratings },
+    ratings: ratings_found ? { ...ratings_found._doc, reviews: formatted_ratings } : rating,
   });
 });
 

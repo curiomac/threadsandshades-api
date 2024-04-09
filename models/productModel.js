@@ -120,6 +120,9 @@ const productSchema = new mongoose.Schema({
     type: String,
     required: [true, "Please enter product status"],
   },
+  verified_purchase_users: {
+    type: Array
+  },
   createdAt: {
     type: Date,
     default: Date.now(),
