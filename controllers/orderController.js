@@ -11,6 +11,7 @@ const sendEmail = require("../utils/email");
 const moment = require("moment");
 // create order - /api/v1/order/create
 exports.createOrder = catchAsyncError(async (req, res, next) => {
+
   const order_data = req.body;
   const user_id = order_data.user_id;
   const user_found = await User.findById(user_id);
@@ -20,8 +21,10 @@ exports.createOrder = catchAsyncError(async (req, res, next) => {
   const email = user_found?.email;
   let products = [];
   const order_items = await Promise.all(
-    order_data?.products?.map(async (product) => {
+    order_data?.product_ids?.map(async (product) => {
+      console.log("tt")
       const found_product = await Product.findById(product.product_id);
+      console.log(("found_product: ", found_product));
       products = [...products, { ...found_product._doc }];
       return {
         product_id: found_product?._id,
