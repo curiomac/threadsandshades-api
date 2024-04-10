@@ -285,3 +285,13 @@ exports.getOrders = catchAsyncError(async (req, res, next) => {
     orders,
   });
 });
+
+// get orders all - /api/v1/orders-all
+exports.getOrdersAll = catchAsyncError(async (req, res, next) => {
+  const orders_all = await Order.find().sort({ createdAt: 'desc' });
+  console.log("orders_all", orders_all);
+  res.status(200).json({
+    success: true,
+    orders_all,
+  });
+});

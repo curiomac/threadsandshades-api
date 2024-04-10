@@ -24,7 +24,7 @@ exports.createRating = catchAsyncError(async (req, res, next) => {
     !product_review ||
     !product_recommend
   ) {
-    return next(new ErrorHandler("All the fields are required", 400));
+    return next(new ErrorHandler("Please ensure all the fields are entered", 400));
   }
   /* Verifing user from the user id */
   const user = await User.findById(user_id);
@@ -53,7 +53,7 @@ exports.createRating = catchAsyncError(async (req, res, next) => {
     );
     console.log("user_rating_found: ", user_rating_found);
     if (user_rating_found) {
-      return next(new ErrorHandler("User already rated this product", 400));
+      return next(new ErrorHandler("You have already rated this product", 400));
     }
     /* Calculating overall ratings value */
     const payload = {
@@ -109,6 +109,7 @@ exports.createRating = catchAsyncError(async (req, res, next) => {
   res.status(200).json({
     success: true,
     ratings: ratings_found ? { ...ratings_found._doc, reviews: formatted_ratings } : rating,
+    message: 'Review submitted successfully!'
   });
 });
 
@@ -147,5 +148,6 @@ exports.getRatings = catchAsyncError(async (req, res, next) => {
   res.status(200).json({
     success: true,
     ratings: { ...ratings_found._doc, reviews: formatted_ratings },
+    message: null
   });
 });
