@@ -35,8 +35,8 @@ router.route('/login').post(loginUser);
 router.route('/logout').get(logoutUser);
 router.route('/password/forgot').post(forgotPassword);
 router.route('/password/reset/:token').post(resetPassword);
-router.route('/profile/get/:id').get(getUserProfile);
-router.route('/profile/image/get/:id').get(getUserProfileImage);
+router.route('/profile/get').get(isAuthenticatedUser, getUserProfile);
+router.route('/profile/image/get').get(isAuthenticatedUser, getUserProfileImage);
 router.route('/password/change').put(isAuthenticatedUser, changePassword);
 router.route('/profile/update/:id').put(
         // isAuthenticatedUser, 

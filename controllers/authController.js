@@ -101,7 +101,7 @@ exports.loginUser = catchAsyncError(async (req, res, next) => {
   }
   const data = await OTP.findOne({ email });
   const currentTime = new Date();
-  const expirationTime = new Date(data.expiration_time);
+  const expirationTime = new Date(data?.expiration_time);
   if (expirationTime < currentTime) {
     await OTP.deleteOne({ email });
     return next(new ErrorHandler("OTP has expired", 400));
@@ -114,12 +114,19 @@ exports.loginUser = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("User not found", 401));
   }
   await OTP.deleteOne({ email });
-  res.status(200).json({
-    success: true,
-    message: "Logged In successfully",
-    code: "proceed-verify-success",
+  // res.status(200).json({
+  //   success: true,
+  //   message: "Logged In successfully",
+  //   code: "proceed-verify-success",
+  //   user,
+  // });
+  sendToken(
     user,
-  });
+    201,
+    res,
+    "Logged in successfully!",
+    "proceed-verify-success"
+  );
 });
 
 // logout - /api/v1/logout
@@ -133,6 +140,7 @@ exports.logoutUser = (req, res, next) => {
     .json({
       success: true,
       message: "Logged out successfully",
+      user: {},
     });
 };
 
@@ -191,21 +199,19 @@ exports.resetPassword = catchAsyncError(async (req, res, next) => {
   sendToken(user, 201, res, "Password updated successfully!");
 });
 
-// Get User Profile - /api/v1/profile/get/:id
-
+// Get User Profile - /api/v1/profile/get
 exports.getUserProfile = catchAsyncError(async (req, res, next) => {
-  const user_id = req.params.id;
-  const user = await User.findById(user_id);
+  const user = await User.findById(req.user.id);
   res.status(200).json({
     success: true,
     user,
   });
 });
-// Get User Profile Image - /api/v1/profile/image/get/:id
+
+// Get User Profile Image - /api/v1/profile/image/get
 
 exports.getUserProfileImage = catchAsyncError(async (req, res, next) => {
-  const user_id = req.params.id;
-  const user = await User.findById(user_id);
+  const user = await User.findById(req.user.id);
   res.status(200).json({
     success: true,
     avatar: user?.avatar,
