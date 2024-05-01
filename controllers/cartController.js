@@ -236,7 +236,8 @@ exports.addCart = catchAsyncError(async (req, res, next) => {
       cart_count: cart_res ? cart_res.cart_items.length : 0,
     },
     added_product: productData,
-    message: is_from === 'qty' ? "" : "Added to cart: Your item is now in the cart and ready for checkout whenever you're ready."
+    message: is_from === 'qty' ? "" : "Added to cart: Your item is now in the cart and ready for checkout whenever you're ready.",
+    toast: is_from === 'qty' ? false : true
   });
 });
 // update cart - /api/v1/cart/update
