@@ -29,7 +29,7 @@ exports.getWishListItems = catchAsyncError(async (req, res, next) => {
 
 // get temporary wishlist items - /api/v1/temp/wishlist
 exports.getTemporaryWishListItems = catchAsyncError(async (req, res, next) => {
-  const { wish_list_details } = req.body;
+  const { wish_list_details, isSingle, targetProduct } = req.body;
   let remove_product_ids = [];
   const wish_list_res = await Promise.all(
     wish_list_details.map(async (item) => {
@@ -46,11 +46,19 @@ exports.getTemporaryWishListItems = catchAsyncError(async (req, res, next) => {
   const filtered_wish_list_res = wish_list_res.filter(
     (item) => item !== undefined
   );
+  const verifiedTargetProduct = await Product.findById(targetProduct?._id);
+  console.log("filtered_wish_list_resfiltered_wish_list_res: ", verifiedTargetProduct);
   res.status(200).json({
     success: true,
     wishList: {
       wish_list_items: filtered_wish_list_res,
-      wish_list_count: filtered_wish_list_res ? filtered_wish_list_res.length : 0,
+      wish_list_count: filtered_wish_list_res
+        ? filtered_wish_list_res.length
+        : 0,
+      added_product: isSingle ? verifiedTargetProduct : {},
+      message:
+        "Your item has been temporarily added to the wish list and is ready to be added to the cart whenever you're ready.",
+      toast: isSingle ? true : false,
     },
   });
 });
@@ -71,7 +79,7 @@ exports.moveWishList = catchAsyncError(async (req, res, next) => {
     wish_list_items: { $elemMatch: { product_id: product._id } },
   });
   if (is_from === "cart") {
-    console.log("[logger] is_from: ", is_from)
+    console.log("[logger] is_from: ", is_from);
     await Cart.findOneAndUpdate(
       { user_id },
       { $pull: { cart_items: { product_id: product._id } } },
@@ -126,6 +134,10 @@ exports.moveWishList = catchAsyncError(async (req, res, next) => {
       wishList: {
         wish_list_items: wish_list_res,
         wish_list_count: wishList ? wishList.wish_list_items.length : 0,
+        added_product: product || {},
+        message:
+          "Your item has ben added to the wish list and is ready to be added to the cart whenever you're ready.",
+        toast: true,
       },
     });
   }
@@ -146,19 +158,19 @@ exports.updateWishlist = catchAsyncError(async (req, res, next) => {
     wish_list_details.map(async (item) => {
       const found_product = await Product.findById(item.product_id);
       if (found_product) {
-            if (
-              found_wish_list &&
-              found_wish_list.wish_list_items.some(
-                (wish_list_item) =>
-                  wish_list_item.product_id.toString() === item.product_id
-              )
-            ) {
-              return;
-            } else {
-              return {
-                product: found_product,
-              };
-            }
+        if (
+          found_wish_list &&
+          found_wish_list.wish_list_items.some(
+            (wish_list_item) =>
+              wish_list_item.product_id.toString() === item.product_id
+          )
+        ) {
+          return;
+        } else {
+          return {
+            product: found_product,
+          };
+        }
       }
     })
   );
@@ -170,7 +182,10 @@ exports.updateWishlist = catchAsyncError(async (req, res, next) => {
   });
   let wish_list = [];
   if (found_wish_list) {
-    const prevWishListItemsMerge = [...found_wish_list.wish_list_items, ...formatedWishListItems];
+    const prevWishListItemsMerge = [
+      ...found_wish_list.wish_list_items,
+      ...formatedWishListItems,
+    ];
     wish_list = await WishList.findOneAndUpdate(
       { user_id },
       {

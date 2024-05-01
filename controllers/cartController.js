@@ -39,7 +39,7 @@ exports.getCartItems = catchAsyncError(async (req, res, next) => {
 });
 // get temporary cart items - /api/v1/temp/cart
 exports.getTemporaryCartItems = catchAsyncError(async (req, res, next) => {
-  const { cart_details } = req.body;
+  const { cart_details, isSingle, targetProduct } = req.body;
   let remove_product_ids = [];
   const cart_items_res = await Promise.all(
     cart_details.map(async (item) => {
@@ -74,11 +74,16 @@ exports.getTemporaryCartItems = catchAsyncError(async (req, res, next) => {
     const dateB = new Date(b.createdAt);
     return dateB - dateA;
   });
+  const verifiedTargetProduct = await Product.findById(targetProduct?._id);
   res.status(200).json({
     success: true,
     cart: {
       cart_items: filtered_cart_items_res,
       cart_count: filtered_cart_items_res ? filtered_cart_items_res.length : 0,
+      added_product: isSingle ? verifiedTargetProduct : {},
+      message:
+        "Added to cart: Your item has been temporarily added to the cart. Please log in to continue checkout whenever you're ready.",
+      toast: isSingle ? true : false,
     },
     remove_product_ids,
   });
@@ -231,7 +236,7 @@ exports.addCart = catchAsyncError(async (req, res, next) => {
       cart_count: cart_res ? cart_res.cart_items.length : 0,
     },
     added_product: productData,
-    message: "Added to cart: Your item is now in the cart and ready for checkout whenever you're ready."
+    message: is_from === 'qty' ? "" : "Added to cart: Your item is now in the cart and ready for checkout whenever you're ready."
   });
 });
 // update cart - /api/v1/cart/update
