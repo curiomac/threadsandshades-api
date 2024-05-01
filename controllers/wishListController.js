@@ -71,9 +71,10 @@ exports.moveWishList = catchAsyncError(async (req, res, next) => {
     wish_list_items: { $elemMatch: { product_id: product._id } },
   });
   if (is_from === "cart") {
+    console.log("[logger] is_from: ", is_from)
     await Cart.findOneAndUpdate(
       { user_id },
-      { $pull: { cart_items: { _id: product._id } } },
+      { $pull: { cart_items: { product_id: product._id } } },
       { new: true }
     );
   }

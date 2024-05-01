@@ -16,7 +16,6 @@ const sendToken = (user, statusCode, res, message, code) => {
     token,
     message,
     user,
-    code,
   });
 };
 

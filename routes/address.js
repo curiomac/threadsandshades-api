@@ -1,9 +1,14 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { isAuthenticatedUser, authorizeRoles } = require('../middlewares/authenticate');
-const { createOrder } = require('../controllers/orderController');
-const { getPostalAddress } = require('../controllers/addressController');
+const {
+  isAuthenticatedUser,
+  authorizeRoles,
+} = require("../middlewares/authenticate");
+const { createOrder } = require("../controllers/orderController");
+const { getPostalAddress } = require("../controllers/addressController");
 
-router.route('/PostalAddress/get/:id').get(getPostalAddress);
+router
+  .route("/PostalAddress/get/:id")
+  .get(isAuthenticatedUser, authorizeRoles('user'), getPostalAddress);
 
-module.exports = router; 
+module.exports = router;

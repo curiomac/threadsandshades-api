@@ -4,6 +4,7 @@ const Cart = require("../models/cartModel");
 const User = require("../models/userModel");
 const Product = require("../models/productModel");
 const mongoose = require("mongoose");
+const wishList = require("../models/wishListModel");
 
 // get cart items - /api/v1/cart/:id
 exports.getCartItems = catchAsyncError(async (req, res, next) => {
@@ -93,6 +94,7 @@ exports.addCart = catchAsyncError(async (req, res, next) => {
     selected_size,
     selected_quantity,
     qty,
+    is_from,
   } = req.body;
   const [user, product] = await Promise.all([
     User.findById(user_id),
@@ -191,7 +193,7 @@ exports.addCart = catchAsyncError(async (req, res, next) => {
       ],
     });
   }
-  console.log("cart_res: ", cart_res)
+  console.log("cart_res: ", cart_res);
   let cart_items_res = await Promise.all(
     cart_res.cart_items.map(async (item) => {
       const found_product = await Product.findById(item.product_id);
@@ -210,13 +212,26 @@ exports.addCart = catchAsyncError(async (req, res, next) => {
     const dateB = new Date(b.createdAt);
     return dateB - dateA;
   });
-
+  if (is_from === "wishlist") {
+    console.log("[logger] is__from: ", is_from);
+    await wishList.findOneAndUpdate(
+      { user_id },
+      { $pull: { wish_list_items: { product_id: product._id } } },
+      { new: true }
+    );
+  }
+  const productData = {
+    _id: product._id,
+    product_images: product.product_images
+  }
   res.status(200).json({
     success: true,
     cart: {
       cart_items: cart_items_res,
       cart_count: cart_res ? cart_res.cart_items.length : 0,
     },
+    added_product: productData,
+    message: "Added to cart: Your item is now in the cart and ready for checkout whenever you're ready."
   });
 });
 // update cart - /api/v1/cart/update

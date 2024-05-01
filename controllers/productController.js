@@ -112,6 +112,47 @@ exports.getProducts = catchAsyncError(async (req, res, next) => {
     filters_available,
   });
 });
+// get products - /api/v1/products
+exports.getRecentProducts = catchAsyncError(async (req, res, next) => {
+  const products = await Product.find();
+  const formated_products = await Promise.all(
+    products.map(async (item) => {
+      let update_product;
+      if (
+        item?.discount_start_date &&
+        item?.discount_end_date &&
+        moment(item.discount_start_date) <= moment(new Date()) &&
+        moment(item.discount_end_date) >= moment(new Date())
+      ) {
+        update_product = await Product.findByIdAndUpdate(
+          item._id,
+          { $set: { is_discounted_product: true } },
+          { new: true }
+        );
+      } else {
+        update_product = await Product.findByIdAndUpdate(
+          item._id,
+          { $set: { is_discounted_product: false } },
+          { new: true }
+        );
+      }
+      const products_group = await ProductsGroup.findOne({
+        "group.products_group_id": item?.products_group_id,
+      });
+      const product_ratings = await Ratings.findOne({product_id: item._id})
+      return {
+        ...update_product._doc,
+        group: products_group.group,
+        ratings: product_ratings
+      };
+    })
+  );
+
+  res.status(200).json({
+    success: true,
+    products: formated_products,
+  });
+});
 // create product -/api/v1/products/create
 exports.createProduct = catchAsyncError(async (req, res, next) => {
   const {

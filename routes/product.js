@@ -30,6 +30,11 @@ router.route("/products/groups").get(getProductsGroups);
 router.route("/products/group/:id").get(getProductsGroup);
 router
   .route("/product/create")
-  .post(upload.array("product_images"), createProduct);
+  .post(
+    isAuthenticatedUser,
+    authorizeRoles("admin", "manager"),
+    upload.array("product_images"),
+    createProduct
+  );
 
 module.exports = router;

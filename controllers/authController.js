@@ -66,7 +66,6 @@ exports.sendOTP = catchAsyncError(async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: "OTP sent successfully",
-    code: "proceed-otp",
     expires_on: expirationTime,
   });
 });
@@ -85,12 +84,7 @@ exports.registerUser = catchAsyncError(async (req, res, next) => {
   }
   const user = await User.create({ email });
   await OTP.deleteOne({ email });
-  res.status(200).json({
-    success: true,
-    message: "Registered successfully",
-    code: "proceed-verify-success",
-    user,
-  });
+  sendToken(user, 201, res, "Registered successfully");
 });
 
 //login user - /api/v1/login
@@ -120,13 +114,7 @@ exports.loginUser = catchAsyncError(async (req, res, next) => {
   //   code: "proceed-verify-success",
   //   user,
   // });
-  sendToken(
-    user,
-    201,
-    res,
-    "Logged in successfully!",
-    "proceed-verify-success"
-  );
+  sendToken(user, 201, res, "Logged in successfully!");
 });
 
 // logout - /api/v1/logout
