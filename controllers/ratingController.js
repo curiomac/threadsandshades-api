@@ -39,7 +39,7 @@ exports.createRating = catchAsyncError(async (req, res, next) => {
   }
   /* Verifing for purchased user from the user id */
   const verified_user = product.verified_purchase_users.some(user => user.user_id === user_id)
-  if(!verified_user) {
+  if (!verified_user) {
     return next(new ErrorHandler("Action restricted", 400));
   }
   /* Checking for product ratings */
@@ -80,7 +80,6 @@ exports.createRating = catchAsyncError(async (req, res, next) => {
     const payload = {
       product_id: product_id,
       ratings_value: rating_value,
-      total_ratings: rating_value,
       reviews: [
         {
           user_id,
@@ -134,6 +133,62 @@ exports.getRatings = catchAsyncError(async (req, res, next) => {
       ratings: {},
     });
   }
+  const getRatingsCountsByStar = () => {
+    /* Initialising the counts */
+
+    let ratingsCount = {
+      star_1: 0,
+      star_2: 0,
+      star_3: 0,
+      star_4: 0,
+      star_5: 0
+    };
+
+    /* Updating Counts from reviews */
+    ratings_found.reviews.forEach(review => {
+      switch (review.rating_value) {
+        case "1":
+          ratingsCount.star_1++;
+          break;
+        case "2":
+          ratingsCount.star_2++;
+          break;
+        case "3":
+          ratingsCount.star_3++;
+          break;
+        case "4":
+          ratingsCount.star_4++;
+          break;
+        case "5":
+          ratingsCount.star_5++;
+          break;
+        default:
+          break;
+      }
+    });
+
+    return ratingsCount;
+  }
+
+  const getTotalRatings = () => {
+    /* Calculating total ratings */
+    const ratingsCounts = getRatingsCountsByStar();
+    const totalRatings = 
+      ratingsCounts.star_1 + 
+      ratingsCounts.star_2 * 2 + 
+      ratingsCounts.star_3 * 3 + 
+      ratingsCounts.star_4 * 4 + 
+      ratingsCounts.star_5 * 5;
+    const totalNumberOfRatings = 
+      ratingsCounts.star_1 + 
+      ratingsCounts.star_2 + 
+      ratingsCounts.star_3 + 
+      ratingsCounts.star_4 + 
+      ratingsCounts.star_5;
+    return totalRatings / totalNumberOfRatings;
+  }
+  
+
   const formatted_ratings = await Promise.all(
     ratings_found.reviews.map(async (item) => {
       console.log("item: ", item);
@@ -141,13 +196,15 @@ exports.getRatings = catchAsyncError(async (req, res, next) => {
       const user = await User.findById(userId);
       return {
         ...item,
-        user,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        avatar: user.avatar
       };
     })
   );
   res.status(200).json({
     success: true,
-    ratings: { ...ratings_found._doc, reviews: formatted_ratings },
+    ratings: { ...ratings_found._doc, reviews: formatted_ratings, total_ratings: getTotalRatings().toString(), ratings_counts_by_star: getRatingsCountsByStar() },
     message: null
   });
 });

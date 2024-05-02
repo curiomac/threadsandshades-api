@@ -9,10 +9,6 @@ const ratingsSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    total_ratings: {
-        type: String,
-        required: true
-    },
     reviews: {
         type: Array,
         required: true

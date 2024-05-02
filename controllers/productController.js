@@ -68,11 +68,67 @@ exports.getProducts = catchAsyncError(async (req, res, next) => {
       const products_group = await ProductsGroup.findOne({
         "group.products_group_id": item?.products_group_id,
       });
-      const product_ratings = await Ratings.findOne({product_id: item._id})
+      const product_ratings = await Ratings.findOne({product_id: String(item._id)});
+      console.log("product_ratings: ", product_ratings, "item._id: ", String(item._id));
+      const getRatingsCountsByStar = () => {
+        /* Initialising the counts */
+    
+        let ratingsCount = {
+          star_1: 0,
+          star_2: 0,
+          star_3: 0,
+          star_4: 0,
+          star_5: 0
+        };
+    
+        /* Updating Counts from reviews */
+        product_ratings?.reviews?.forEach(review => {
+          switch (review.rating_value) {
+            case "1":
+              ratingsCount.star_1++;
+              break;
+            case "2":
+              ratingsCount.star_2++;
+              break;
+            case "3":
+              ratingsCount.star_3++;
+              break;
+            case "4":
+              ratingsCount.star_4++;
+              break;
+            case "5":
+              ratingsCount.star_5++;
+              break;
+            default:
+              break;
+          }
+        });
+    
+        return ratingsCount;
+      }
+    
+      const getTotalRatings = () => {
+        /* Calculating total ratings */
+        const ratingsCounts = getRatingsCountsByStar();
+        const totalRatings = 
+          ratingsCounts.star_1 + 
+          ratingsCounts.star_2 * 2 + 
+          ratingsCounts.star_3 * 3 + 
+          ratingsCounts.star_4 * 4 + 
+          ratingsCounts.star_5 * 5;
+        const totalNumberOfRatings = 
+          ratingsCounts.star_1 + 
+          ratingsCounts.star_2 + 
+          ratingsCounts.star_3 + 
+          ratingsCounts.star_4 + 
+          ratingsCounts.star_5;
+        return totalRatings / totalNumberOfRatings;
+      }
+      console.log("getTotalRatings: ", getTotalRatings());
       return {
         ...update_product._doc,
         group: products_group.group,
-        ratings: product_ratings
+        ratings: getTotalRatings() || 0
       };
     })
   );
