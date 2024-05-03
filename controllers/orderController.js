@@ -22,9 +22,7 @@ exports.createOrder = catchAsyncError(async (req, res, next) => {
   let products = [];
   const order_items = await Promise.all(
     order_data?.products?.map(async (product) => {
-      console.log("tt")
       const found_product = await Product.findById(product.product_id);
-      console.log(("found_product: ", found_product));
       products = [...products, { ...found_product._doc }];
       return {
         product_id: found_product?._id,
@@ -93,7 +91,6 @@ exports.createOrder = catchAsyncError(async (req, res, next) => {
   const order = await Order.create(orders_content);
   const hashed_order_id = order?._id;
   const momented_date = moment(order?.createdAt).format("MMM DD, YYYY");
-  console.log("momented_date: ", momented_date);
   const generateTableRows = (products) => {
     let tableRows = "";
     for (let i = 0; i < products.length; i++) {
@@ -292,7 +289,6 @@ exports.getOrders = catchAsyncError(async (req, res, next) => {
 // get orders all - /api/v1/orders-all
 exports.getOrdersAll = catchAsyncError(async (req, res, next) => {
   const orders_all = await Order.find().sort({ createdAt: 'desc' });
-  console.log("orders_all", orders_all);
   res.status(200).json({
     success: true,
     orders_all,

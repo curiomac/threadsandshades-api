@@ -198,11 +198,9 @@ exports.addCart = catchAsyncError(async (req, res, next) => {
       ],
     });
   }
-  console.log("cart_res: ", cart_res);
   let cart_items_res = await Promise.all(
     cart_res.cart_items.map(async (item) => {
       const found_product = await Product.findById(item.product_id);
-      console.log("item: ", item);
       return {
         selected_product_details: item?.selected_product_details,
         product: found_product,
@@ -210,7 +208,6 @@ exports.addCart = catchAsyncError(async (req, res, next) => {
       };
     })
   );
-  console.log("cart_items_res: ", cart_items_res);
   // Sort cart_items_res by the dateCreated property of the products
   cart_items_res.sort((a, b) => {
     const dateA = new Date(a.createdAt);
@@ -218,7 +215,6 @@ exports.addCart = catchAsyncError(async (req, res, next) => {
     return dateB - dateA;
   });
   if (is_from === "wishlist") {
-    console.log("[logger] is__from: ", is_from);
     await wishList.findOneAndUpdate(
       { user_id },
       { $pull: { wish_list_items: { product_id: product._id } } },

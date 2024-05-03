@@ -17,7 +17,6 @@ exports.getWishListItems = catchAsyncError(async (req, res, next) => {
       };
     })
   );
-  console.log("wishList: ", wishList);
   res.status(200).json({
     success: true,
     wishList: {
@@ -47,7 +46,6 @@ exports.getTemporaryWishListItems = catchAsyncError(async (req, res, next) => {
     (item) => item !== undefined
   );
   const verifiedTargetProduct = await Product.findById(targetProduct?._id);
-  console.log("filtered_wish_list_resfiltered_wish_list_res: ", verifiedTargetProduct);
   res.status(200).json({
     success: true,
     wishList: {
@@ -79,7 +77,6 @@ exports.moveWishList = catchAsyncError(async (req, res, next) => {
     wish_list_items: { $elemMatch: { product_id: product._id } },
   });
   if (is_from === "cart") {
-    console.log("[logger] is_from: ", is_from);
     await Cart.findOneAndUpdate(
       { user_id },
       { $pull: { cart_items: { product_id: product._id } } },

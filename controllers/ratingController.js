@@ -48,14 +48,12 @@ exports.createRating = catchAsyncError(async (req, res, next) => {
   }
   /* Checking for product ratings */
   const ratings_found = await Ratings.findOne({ product_id: productId });
-  let rating;
   if (ratings_found) {
     /* Proceed for found product ratings */
     /* Checking if user already rated this product */
     const user_rating_found = ratings_found.reviews.some(
       (review) => review.user_id === user_id
     );
-    console.log("user_rating_found: ", user_rating_found);
     if (user_rating_found) {
       return next(new ErrorHandler("You have already rated this product", 400));
     }
@@ -68,7 +66,7 @@ exports.createRating = catchAsyncError(async (req, res, next) => {
       product_recommend,
       posted_on: new Date(),
     };
-    rating = await Ratings.findOneAndUpdate(
+    await Ratings.findOneAndUpdate(
       { product_id: productId },
       {
         $addToSet: {
@@ -95,25 +93,24 @@ exports.createRating = catchAsyncError(async (req, res, next) => {
         },
       ],
     };
-    rating = await Ratings.create(payload);
+    await Ratings.create(payload);
   }
   /* Formating response for ratings (Only if ratings found) */
-  const formatted_ratings = await Promise.all(
-    rating.reviews.map(async (item) => {
-      console.log("item: ", item);
-      const userId = mongoose.Types.ObjectId(item.user_id);
-      const user = await User.findById(userId);
-      return {
-        ...item,
-        user,
-      };
-    })
-  );
+  // const formatted_ratings = await Promise.all(
+  //   rating.reviews.map(async (item) => {
+  //     const userId = mongoose.Types.ObjectId(item.user_id);
+  //     const user = await User.findById(userId);
+  //     return {
+  //       ...item,
+  //       user,
+  //     };
+  //   })
+  // );
   res.status(200).json({
     success: true,
-    ratings: ratings_found
-      ? { ...ratings_found._doc, reviews: formatted_ratings }
-      : rating,
+    // ratings: ratings_found
+    //   ? { ...ratings_found._doc, reviews: formatted_ratings.sort((a, b) => new Date(b.posted_on) - new Date(a.posted_on)) }
+    //   : rating,
     message: "Review submitted successfully!",
   });
 });
@@ -152,7 +149,7 @@ exports.getRatings = catchAsyncError(async (req, res, next) => {
 
     /* Updating Counts from reviews */
     ratings_found.reviews.forEach((review) => {
-      switch (review.rating_value) {
+      switch (review.rating_value?.toString()) {
         case "1":
           ratingsCount.star_1++;
           break;
@@ -175,7 +172,18 @@ exports.getRatings = catchAsyncError(async (req, res, next) => {
 
     return ratingsCount;
   };
-  let totalNumberOfRatingsCount = 0;
+  console.log("getRatingsCountsByStar: ", getRatingsCountsByStar());
+  const getRatingsCountTotal = () => {
+    /* Calculating total ratings count */
+    const ratingsCounts = getRatingsCountsByStar();
+    const totalNumberOfRatings =
+      ratingsCounts.star_1 +
+      ratingsCounts.star_2 +
+      ratingsCounts.star_3 +
+      ratingsCounts.star_4 +
+      ratingsCounts.star_5;
+      return totalNumberOfRatings
+  }
   const getTotalRatings = () => {
     /* Calculating total ratings */
     const ratingsCounts = getRatingsCountsByStar();
@@ -185,19 +193,12 @@ exports.getRatings = catchAsyncError(async (req, res, next) => {
       ratingsCounts.star_3 * 3 +
       ratingsCounts.star_4 * 4 +
       ratingsCounts.star_5 * 5;
-    const totalNumberOfRatings =
-      ratingsCounts.star_1 +
-      ratingsCounts.star_2 +
-      ratingsCounts.star_3 +
-      ratingsCounts.star_4 +
-      ratingsCounts.star_5;
-      totalNumberOfRatingsCount = totalNumberOfRatings;
-    return totalRatings / totalNumberOfRatings;
+    return totalRatings / getRatingsCountTotal();
   };
 
   const formatted_ratings = await Promise.all(
     ratings_found.reviews.map(async (item) => {
-      console.log("item: ", item);
+      
       const userId = mongoose.Types.ObjectId(item.user_id);
       const user = await User.findById(userId);
       return {
@@ -212,9 +213,9 @@ exports.getRatings = catchAsyncError(async (req, res, next) => {
     success: true,
     ratings: {
       ...ratings_found._doc,
-      reviews: formatted_ratings,
-      ratings_count: totalNumberOfRatingsCount,
-      total_ratings: getTotalRatings().toString(),
+      reviews: formatted_ratings.sort((a, b) => new Date(b.posted_on) - new Date(a.posted_on)),
+      ratings_count: getRatingsCountTotal(),
+      total_ratings: getTotalRatings().toFixed(1).toString(),
       ratings_counts_by_star: getRatingsCountsByStar(),
     },
     message: null,

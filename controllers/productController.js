@@ -68,22 +68,23 @@ exports.getProducts = catchAsyncError(async (req, res, next) => {
       const products_group = await ProductsGroup.findOne({
         "group.products_group_id": item?.products_group_id,
       });
-      const product_ratings = await Ratings.findOne({product_id: String(item._id)});
-      console.log("product_ratings: ", product_ratings, "item._id: ", String(item._id));
+      const product_ratings = await Ratings.findOne({
+        product_id: String(item._id),
+      });
       const getRatingsCountsByStar = () => {
         /* Initialising the counts */
-    
+
         let ratingsCount = {
           star_1: 0,
           star_2: 0,
           star_3: 0,
           star_4: 0,
-          star_5: 0
+          star_5: 0,
         };
-    
+
         /* Updating Counts from reviews */
-        product_ratings?.reviews?.forEach(review => {
-          switch (review.rating_value) {
+        product_ratings?.reviews?.forEach((review) => {
+          switch (review.rating_value.toString()) {
             case "1":
               ratingsCount.star_1++;
               break;
@@ -103,32 +104,35 @@ exports.getProducts = catchAsyncError(async (req, res, next) => {
               break;
           }
         });
-    
+
         return ratingsCount;
-      }
-    
+      };
+
       const getTotalRatings = () => {
         /* Calculating total ratings */
         const ratingsCounts = getRatingsCountsByStar();
-        const totalRatings = 
-          ratingsCounts.star_1 + 
-          ratingsCounts.star_2 * 2 + 
-          ratingsCounts.star_3 * 3 + 
-          ratingsCounts.star_4 * 4 + 
+        const totalRatings =
+          ratingsCounts.star_1 +
+          ratingsCounts.star_2 * 2 +
+          ratingsCounts.star_3 * 3 +
+          ratingsCounts.star_4 * 4 +
           ratingsCounts.star_5 * 5;
-        const totalNumberOfRatings = 
-          ratingsCounts.star_1 + 
-          ratingsCounts.star_2 + 
-          ratingsCounts.star_3 + 
-          ratingsCounts.star_4 + 
+        const totalNumberOfRatings =
+          ratingsCounts.star_1 +
+          ratingsCounts.star_2 +
+          ratingsCounts.star_3 +
+          ratingsCounts.star_4 +
           ratingsCounts.star_5;
         return totalRatings / totalNumberOfRatings;
-      }
-      console.log("getTotalRatings: ", getTotalRatings());
+      };
+      console.log("getTotalRatings().toFixed(1).toString(): ", getTotalRatings().toFixed(1).toString());
       return {
         ...update_product._doc,
         group: products_group.group,
-        ratings: getTotalRatings() || 0
+        ratings:
+          getTotalRatings().toFixed(1).toString() === 'NaN'
+            ? 0
+            : getTotalRatings().toFixed(1).toString() || 0,
       };
     })
   );
@@ -195,11 +199,11 @@ exports.getRecentProducts = catchAsyncError(async (req, res, next) => {
       const products_group = await ProductsGroup.findOne({
         "group.products_group_id": item?.products_group_id,
       });
-      const product_ratings = await Ratings.findOne({product_id: item._id})
+      const product_ratings = await Ratings.findOne({ product_id: item._id });
       return {
         ...update_product._doc,
         group: products_group.group,
-        ratings: product_ratings
+        ratings: product_ratings,
       };
     })
   );

@@ -17,13 +17,17 @@ router
   .post(isAuthenticatedUser, authorizeRoles("user"), createOrder);
 router
   .route("/order-status/update")
-  .put(isAuthenticatedUser, authorizeRoles("user"), updateOrderStaus);
+  .put(
+    // isAuthenticatedUser, authorizeRoles("user"),
+     updateOrderStaus);
 router
   .route("/order/:id")
   .get(isAuthenticatedUser, authorizeRoles("user"), getOrder);
 router
   .route("/orders-all")
-  .get(isAuthenticatedUser, authorizeRoles("admin"), getOrdersAll);
+  .get(
+    // isAuthenticatedUser, authorizeRoles("admin"), 
+    getOrdersAll);
 router
   .route("/orders/:id")
   .get(

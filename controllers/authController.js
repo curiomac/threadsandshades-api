@@ -255,7 +255,6 @@ exports.updateProfile = catchAsyncError(async (req, res, next) => {
       // runValidators: true,
     }
   );
-  console.log("user: ", user);
   res.status(200).json({
     success: true,
     user,
@@ -270,7 +269,6 @@ exports.updateProfileImage = catchAsyncError(async (req, res, next) => {
   }
   let avatar;
   if (req.file) {
-    console.log("req.file: ", req.file);
     avatar = `${process.env.SERVER_URL}/uploads/user/${req.file.originalname}`;
   }
   const user = await User.findOneAndUpdate(
@@ -281,7 +279,6 @@ exports.updateProfileImage = catchAsyncError(async (req, res, next) => {
       // runValidators: true,
     }
   );
-  console.log("user: ", user);
   res.status(200).json({
     success: true,
     avatar: user.avatar,
