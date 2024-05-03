@@ -21,7 +21,7 @@ exports.createOrder = catchAsyncError(async (req, res, next) => {
   const email = user_found?.email;
   let products = [];
   const order_items = await Promise.all(
-    order_data?.product_ids?.map(async (product) => {
+    order_data?.products?.map(async (product) => {
       console.log("tt")
       const found_product = await Product.findById(product.product_id);
       console.log(("found_product: ", found_product));

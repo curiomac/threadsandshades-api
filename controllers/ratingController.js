@@ -24,7 +24,9 @@ exports.createRating = catchAsyncError(async (req, res, next) => {
     !product_review ||
     !product_recommend
   ) {
-    return next(new ErrorHandler("Please ensure all the fields are entered", 400));
+    return next(
+      new ErrorHandler("Please ensure all the fields are entered", 400)
+    );
   }
   /* Verifing user from the user id */
   const user = await User.findById(user_id);
@@ -38,7 +40,9 @@ exports.createRating = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("Product not found with this id", 404));
   }
   /* Verifing for purchased user from the user id */
-  const verified_user = product.verified_purchase_users.some(user => user.user_id === user_id)
+  const verified_user = product.verified_purchase_users.some(
+    (user) => user.user_id === user_id
+  );
   if (!verified_user) {
     return next(new ErrorHandler("Action restricted", 400));
   }
@@ -107,8 +111,10 @@ exports.createRating = catchAsyncError(async (req, res, next) => {
   );
   res.status(200).json({
     success: true,
-    ratings: ratings_found ? { ...ratings_found._doc, reviews: formatted_ratings } : rating,
-    message: 'Review submitted successfully!'
+    ratings: ratings_found
+      ? { ...ratings_found._doc, reviews: formatted_ratings }
+      : rating,
+    message: "Review submitted successfully!",
   });
 });
 
@@ -141,11 +147,11 @@ exports.getRatings = catchAsyncError(async (req, res, next) => {
       star_2: 0,
       star_3: 0,
       star_4: 0,
-      star_5: 0
+      star_5: 0,
     };
 
     /* Updating Counts from reviews */
-    ratings_found.reviews.forEach(review => {
+    ratings_found.reviews.forEach((review) => {
       switch (review.rating_value) {
         case "1":
           ratingsCount.star_1++;
@@ -168,26 +174,26 @@ exports.getRatings = catchAsyncError(async (req, res, next) => {
     });
 
     return ratingsCount;
-  }
-
+  };
+  let totalNumberOfRatingsCount = 0;
   const getTotalRatings = () => {
     /* Calculating total ratings */
     const ratingsCounts = getRatingsCountsByStar();
-    const totalRatings = 
-      ratingsCounts.star_1 + 
-      ratingsCounts.star_2 * 2 + 
-      ratingsCounts.star_3 * 3 + 
-      ratingsCounts.star_4 * 4 + 
+    const totalRatings =
+      ratingsCounts.star_1 +
+      ratingsCounts.star_2 * 2 +
+      ratingsCounts.star_3 * 3 +
+      ratingsCounts.star_4 * 4 +
       ratingsCounts.star_5 * 5;
-    const totalNumberOfRatings = 
-      ratingsCounts.star_1 + 
-      ratingsCounts.star_2 + 
-      ratingsCounts.star_3 + 
-      ratingsCounts.star_4 + 
+    const totalNumberOfRatings =
+      ratingsCounts.star_1 +
+      ratingsCounts.star_2 +
+      ratingsCounts.star_3 +
+      ratingsCounts.star_4 +
       ratingsCounts.star_5;
+      totalNumberOfRatingsCount = totalNumberOfRatings;
     return totalRatings / totalNumberOfRatings;
-  }
-  
+  };
 
   const formatted_ratings = await Promise.all(
     ratings_found.reviews.map(async (item) => {
@@ -198,13 +204,19 @@ exports.getRatings = catchAsyncError(async (req, res, next) => {
         ...item,
         first_name: user.first_name,
         last_name: user.last_name,
-        avatar: user.avatar
+        avatar: user.avatar,
       };
     })
   );
   res.status(200).json({
     success: true,
-    ratings: { ...ratings_found._doc, reviews: formatted_ratings, total_ratings: getTotalRatings().toString(), ratings_counts_by_star: getRatingsCountsByStar() },
-    message: null
+    ratings: {
+      ...ratings_found._doc,
+      reviews: formatted_ratings,
+      ratings_count: totalNumberOfRatingsCount,
+      total_ratings: getTotalRatings().toString(),
+      ratings_counts_by_star: getRatingsCountsByStar(),
+    },
+    message: null,
   });
 });

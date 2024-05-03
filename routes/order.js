@@ -26,6 +26,8 @@ router
   .get(isAuthenticatedUser, authorizeRoles("admin"), getOrdersAll);
 router
   .route("/orders/:id")
-  .get(isAuthenticatedUser, authorizeRoles("user", "admin"), getOrders);
+  .get(
+    // isAuthenticatedUser, authorizeRoles("user", "admin"),
+     getOrders);
 
 module.exports = router;
