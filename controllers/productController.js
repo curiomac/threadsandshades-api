@@ -125,7 +125,6 @@ exports.getProducts = catchAsyncError(async (req, res, next) => {
           ratingsCounts.star_5;
         return totalRatings / totalNumberOfRatings;
       };
-      console.log("getTotalRatings().toFixed(1).toString(): ", getTotalRatings().toFixed(1).toString());
       return {
         ...update_product._doc,
         group: products_group.group,

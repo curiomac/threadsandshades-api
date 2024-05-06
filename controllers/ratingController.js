@@ -133,7 +133,9 @@ exports.getRatings = catchAsyncError(async (req, res, next) => {
   if (!ratings_found) {
     return res.status(200).json({
       success: true,
-      ratings: {},
+      ratings: {
+        total_ratings: 0
+      },
     });
   }
   const getRatingsCountsByStar = () => {
@@ -172,7 +174,6 @@ exports.getRatings = catchAsyncError(async (req, res, next) => {
 
     return ratingsCount;
   };
-  console.log("getRatingsCountsByStar: ", getRatingsCountsByStar());
   const getRatingsCountTotal = () => {
     /* Calculating total ratings count */
     const ratingsCounts = getRatingsCountsByStar();

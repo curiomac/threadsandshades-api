@@ -63,6 +63,7 @@ exports.sendOTP = catchAsyncError(async (req, res, next) => {
     subject: "Email verification",
     message: htmlTemplate,
   });
+  console.log('[66] [OTP_SENT]: ', email)
   res.status(200).json({
     success: true,
     message: "OTP sent successfully",
@@ -84,6 +85,7 @@ exports.registerUser = catchAsyncError(async (req, res, next) => {
   }
   const user = await User.create({ email });
   await OTP.deleteOne({ email });
+  console.log('[88] [REGISTRATION_SUCCESSFULL]: ', user)
   sendToken(user, 201, res, "Registered successfully");
 });
 
@@ -114,6 +116,7 @@ exports.loginUser = catchAsyncError(async (req, res, next) => {
   //   code: "proceed-verify-success",
   //   user,
   // });
+  console.log('[119] [LOGIN_SUCCESSFULL]: ', user)
   sendToken(user, 201, res, "Logged in successfully!");
 });
 
