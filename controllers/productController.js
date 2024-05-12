@@ -17,7 +17,7 @@ exports.getProduct = catchAsyncError(async (req, res, next) => {
     products_group.group.map(async (group) => {
       let assigned_product = await Product.findById(group.product_id);
       return {
-        product_id: assigned_product._id,
+        _id: assigned_product._id,
         products_group_id: assigned_product.products_group_id,
         product_title: assigned_product.product_title,
         product_label: assigned_product.product_label,
@@ -89,7 +89,7 @@ exports.getProducts = catchAsyncError(async (req, res, next) => {
         products_group.group.map(async (group) => {
           let assigned_product = await Product.findById(group.product_id);
           return {
-            product_id: assigned_product._id,
+            _id: assigned_product._id,
             products_group_id: assigned_product.products_group_id,
             product_title: assigned_product.product_title,
             product_label: assigned_product.product_label,
@@ -299,7 +299,7 @@ exports.createProduct = catchAsyncError(async (req, res, next) => {
   res.status(200).json({
     success: true,
     product,
-    message: "Product creation successful",
+    message: "Product creation successfull",
   });
 });
 
@@ -312,9 +312,27 @@ exports.getProductsGroup = catchAsyncError(async (req, res, next) => {
       new ErrorHandler("No products found for this product group ID", 404)
     );
   }
+  const assembled_products = await Promise.all(
+    products_group.group.map(async (group) => {
+      let assigned_product = await Product.findById(group.product_id);
+      return {
+        _id: assigned_product._id,
+        products_group_id: assigned_product.products_group_id,
+        product_title: assigned_product.product_title,
+        product_label: assigned_product.product_label,
+        product_images: assigned_product.product_images,
+        target_color: assigned_product.target_color,
+        target_color_code: assigned_product.target_color_code,
+        sale_price: assigned_product.sale_price,
+        product_status: assigned_product.product_status
+      };
+    })
+  );
   res.status(200).json({
     success: true,
-    products_group,
+    products_group: {
+      group: assembled_products,
+    },
   });
 });
 
@@ -338,6 +356,28 @@ exports.getProductsGroups = catchAsyncError(async (req, res, next) => {
       ? Math.ceil(productsGroupsCount / resPerPage)
       : 1;
   const productsGroups = await buildQuery().paginate(resPerPage).query;
+  const looped_assemble_bases = await Promise.all(
+    productsGroups.map(async (productGroup) => {
+      console.log("productGroup: ", productGroup._id);
+      return {
+        _id: productGroup._id,
+        group: await Promise.all(
+          productGroup.group.map(async (group) => {
+            let assigned_product = await Product.findById(group.product_id);
+            return {
+              product_id: assigned_product._id,
+              products_group_id: assigned_product.products_group_id,
+              product_title: assigned_product.product_title,
+              product_label: assigned_product.product_label,
+              product_images: assigned_product.product_images,
+              target_color: assigned_product.target_color,
+              target_color_code: assigned_product.target_color_code,
+            };
+          })
+        ),
+      };
+    })
+  );
 
   if (productsGroupsCount === 0) {
     return next(new ErrorHandler("No products groups found", 404));
@@ -348,6 +388,6 @@ exports.getProductsGroups = catchAsyncError(async (req, res, next) => {
     totalCounts: productsGroupsCount,
     totalPages,
     currentPage,
-    productsGroups,
+    productsGroups: looped_assemble_bases,
   });
 });
