@@ -31,8 +31,8 @@ router.route("/products/group/:id").get(getProductsGroup);
 router
   .route("/product/create")
   .post(
-    isAuthenticatedUser,
-    authorizeRoles("admin", "manager"),
+    // isAuthenticatedUser,
+    // authorizeRoles("admin", "manager"),
     upload.array("product_images"),
     createProduct
   );

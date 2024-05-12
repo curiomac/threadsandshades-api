@@ -13,6 +13,20 @@ exports.getProduct = catchAsyncError(async (req, res, next) => {
   const products_group = await ProductsGroup.findOne({
     "group.products_group_id": product?.products_group_id,
   });
+  const assembled_products = await Promise.all(
+    products_group.group.map(async (group) => {
+      let assigned_product = await Product.findById(group.product_id);
+      return {
+        product_id: assigned_product._id,
+        products_group_id: assigned_product.products_group_id,
+        product_title: assigned_product.product_title,
+        product_label: assigned_product.product_label,
+        product_images: assigned_product.product_images,
+        target_color: assigned_product.target_color,
+        target_color_code: assigned_product.target_color_code,
+      };
+    })
+  );
   if (!product) {
     return next(new ErrorHandler("Product not found with this id", 404));
   }
@@ -22,7 +36,10 @@ exports.getProduct = catchAsyncError(async (req, res, next) => {
   res.status(200).json({
     success: true,
     product,
-    products_group,
+    products_group: {
+      products_group_id: product?.products_group_id,
+      group: assembled_products,
+    },
   });
 });
 
@@ -68,6 +85,20 @@ exports.getProducts = catchAsyncError(async (req, res, next) => {
       const products_group = await ProductsGroup.findOne({
         "group.products_group_id": item?.products_group_id,
       });
+      const assembled_products = await Promise.all(
+        products_group.group.map(async (group) => {
+          let assigned_product = await Product.findById(group.product_id);
+          return {
+            product_id: assigned_product._id,
+            products_group_id: assigned_product.products_group_id,
+            product_title: assigned_product.product_title,
+            product_label: assigned_product.product_label,
+            product_images: assigned_product.product_images,
+            target_color: assigned_product.target_color,
+            target_color_code: assigned_product.target_color_code,
+          };
+        })
+      );
       const product_ratings = await Ratings.findOne({
         product_id: String(item._id),
       });
@@ -127,9 +158,9 @@ exports.getProducts = catchAsyncError(async (req, res, next) => {
       };
       return {
         ...update_product._doc,
-        group: products_group.group,
+        group: assembled_products,
         ratings:
-          getTotalRatings().toFixed(1).toString() === 'NaN'
+          getTotalRatings().toFixed(1).toString() === "NaN"
             ? 0
             : getTotalRatings().toFixed(1).toString() || 0,
       };
@@ -141,13 +172,13 @@ exports.getProducts = catchAsyncError(async (req, res, next) => {
       const targetColors = await Product.aggregate([
         {
           $group: {
-            _id: "$target_color",
+            _id: "$target_color_code",
           },
         },
         {
           $project: {
             _id: 0,
-            target_color: "$_id",
+            target_color_code: "$_id",
           },
         },
       ]);
@@ -157,7 +188,6 @@ exports.getProducts = catchAsyncError(async (req, res, next) => {
       console.error("Error occurred:", error);
     }
   };
-
   const filters_available = await getAvailableFilters();
 
   res.status(200).json({
@@ -257,13 +287,13 @@ exports.createProduct = catchAsyncError(async (req, res, next) => {
   const product = await Product.create(create_product);
   let products_group_data = await ProductsGroup.findOneAndUpdate(
     { "group.products_group_id": products_group_id },
-    { $addToSet: { group: product } },
+    { $addToSet: { group: { product_id: product._id, products_group_id } } },
     { new: true }
   );
 
   if (!products_group_data) {
     products_group_data = await ProductsGroup.create({
-      group: [product],
+      group: [{ product_id: product._id, products_group_id }],
     });
   }
   res.status(200).json({

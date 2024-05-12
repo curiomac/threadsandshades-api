@@ -1,5 +1,5 @@
-const product = require('../data/product.json');
-const Product = require('../models/productModel');
+const theme = require('../data/theme.json');
+const Theme = require('../models/themeModel');
 const dotenv = require('dotenv');
 const connectDatabase = require('../config/database');
 
@@ -8,9 +8,9 @@ connectDatabase();
 
 const seedProduct = async () => {
     try {
-        await Product.deleteMany();
+        await Theme.deleteMany();
         console.log('Products deleted');
-        await Product.insertMany(product);
+        await Theme.insertMany(theme);
         console.log('All products added');
     } catch (error) {
         console.log(error.message);
