@@ -201,47 +201,66 @@ exports.getProducts = catchAsyncError(async (req, res, next) => {
     filters_available,
   });
 });
-// get products - /api/v1/products
-exports.getRecentProducts = catchAsyncError(async (req, res, next) => {
-  const products = await Product.find();
-  const formated_products = await Promise.all(
-    products.map(async (item) => {
-      let update_product;
-      if (
-        item?.discount_start_date &&
-        item?.discount_end_date &&
-        moment(item.discount_start_date) <= moment(new Date()) &&
-        moment(item.discount_end_date) >= moment(new Date())
-      ) {
-        update_product = await Product.findByIdAndUpdate(
-          item._id,
-          { $set: { is_discounted_product: true } },
-          { new: true }
-        );
-      } else {
-        update_product = await Product.findByIdAndUpdate(
-          item._id,
-          { $set: { is_discounted_product: false } },
-          { new: true }
-        );
-      }
-      const products_group = await ProductsGroup.findOne({
-        "group.products_group_id": item?.products_group_id,
-      });
-      const product_ratings = await Ratings.findOne({ product_id: item._id });
-      return {
-        ...update_product._doc,
-        group: products_group.group,
-        ratings: product_ratings,
-      };
-    })
-  );
+// get similar products - /api/v1/similar/products
+exports.getSimilarProducts = catchAsyncError(async (req, res, next) => {
+  const { product_id } = req.query;
+
+  // Fetch the product to find its attributes
+  const product = await Product.findById(product_id);
+  if (!product) {
+    return res.status(404).json({
+      success: false,
+      message: "Product not found",
+    });
+  }
+
+  const criteria = {
+    _id: { $ne: product_id },
+    product_tags: { $in: product.product_tags },
+  };
+
+  const products = await Product.find(criteria);
 
   res.status(200).json({
     success: true,
-    products: formated_products,
+    count: products.length,
+    products: products,
   });
 });
+// get top products - /api/v1/top/products
+exports.getTopProducts = catchAsyncError(async (req, res, next) => {
+  const { product_id } = req.query;
+
+  const product = await Product.findById(product_id);
+  if (!product) {
+    return res.status(404).json({
+      success: false,
+      message: "Product not found",
+    });
+  }
+
+  const products = await Product.find();
+
+  const productIds = products.map((p) => p._id);
+  const ratings = await Ratings.find({ product_id: { $in: productIds } });
+
+  const productsWithRatings = products.map((product) => {
+    const productRatings = ratings.find((rating) =>
+      rating.product_id === product._id.toString()
+    );
+    console.log("productRatings: ", productRatings);
+    return {
+      ...product.toObject(),
+      ratings:productRatings.rating_value,
+    };
+  });
+  res.status(200).json({
+    success: true,
+    count: productsWithRatings.length,
+    products: productsWithRatings,
+  });
+});
+
 // create product -/api/v1/products/create
 exports.createProduct = catchAsyncError(async (req, res, next) => {
   const {
@@ -324,7 +343,7 @@ exports.getProductsGroup = catchAsyncError(async (req, res, next) => {
         target_color: assigned_product.target_color,
         target_color_code: assigned_product.target_color_code,
         sale_price: assigned_product.sale_price,
-        product_status: assigned_product.product_status
+        product_status: assigned_product.product_status,
       };
     })
   );

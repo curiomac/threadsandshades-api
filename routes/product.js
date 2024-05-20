@@ -10,6 +10,8 @@ const {
   createProduct,
   getProductsGroup,
   getProductsGroups,
+  getSimilarProducts,
+  getTopProducts,
 } = require("../controllers/productController");
 const multer = require("multer");
 const path = require("path");
@@ -25,16 +27,16 @@ const upload = multer({
   }),
 });
 router.route("/products").get(getProducts);
+router.route("/similar/products").get(getSimilarProducts);
+router.route("/top/products").get(getTopProducts);
 router.route("/product/:id").get(getProduct);
 router.route("/products/groups").get(getProductsGroups);
 router.route("/products/group/:id").get(getProductsGroup);
-router
-  .route("/product/create")
-  .post(
-    // isAuthenticatedUser,
-    // authorizeRoles("admin", "manager"),
-    upload.array("product_images"),
-    createProduct
-  );
+router.route("/product/create").post(
+  // isAuthenticatedUser,
+  // authorizeRoles("admin", "manager"),
+  upload.array("product_images"),
+  createProduct
+);
 
 module.exports = router;

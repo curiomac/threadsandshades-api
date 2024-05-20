@@ -11,7 +11,6 @@ const sendEmail = require("../utils/email");
 const moment = require("moment");
 // create order - /api/v1/order/create
 exports.createOrder = catchAsyncError(async (req, res, next) => {
-
   const order_data = req.body;
   const user_id = order_data.user_id;
   const user_found = await User.findById(user_id);
@@ -33,7 +32,9 @@ exports.createOrder = catchAsyncError(async (req, res, next) => {
         fixed_price: found_product?.fixed_price,
         product_title: found_product?.product_title,
         product_label: found_product?.product_label,
+        product_type: found_product?.product_type,
         target_color: found_product?.target_color,
+        target_gender: found_product?.target_gender,
         target_color_code: found_product?.target_color_code,
         selected_color: product?.selected_color,
         selected_color_code: product?.selected_color_code,
@@ -192,7 +193,7 @@ exports.createOrder = catchAsyncError(async (req, res, next) => {
 
 // update order status - /api/v1/order-status
 exports.updateOrderStaus = catchAsyncError(async (req, res, next) => {
-  const { order_id, status } = req.body
+  const { order_id, status } = req.body;
   /* Checking for order */
   if (!order_id || !status) {
     return next(new ErrorHandler("All the fields are required", 400));
@@ -205,14 +206,27 @@ exports.updateOrderStaus = catchAsyncError(async (req, res, next) => {
   let order_res = order;
   /* Updating order status */
   switch (status) {
-    case ('shipped'): {
+    case "shipped": {
       /* Preventing updating duplicate status */
-      if(order?.order_status === 'shipped') {
-        return next(new ErrorHandler(`Current order status is already in ${order?.order_status} state`, 400));
+      if (order?.order_status === "shipped") {
+        return next(
+          new ErrorHandler(
+            `Current order status is already in ${order?.order_status} state`,
+            400
+          )
+        );
       }
       /* Preventing updating to previous status */
-      if (order?.order_status === 'delivered' || order?.order_status === 'canceled') {
-        return next(new ErrorHandler("Updating order status to previous status is restricted", 400));
+      if (
+        order?.order_status === "delivered" ||
+        order?.order_status === "canceled"
+      ) {
+        return next(
+          new ErrorHandler(
+            "Updating order status to previous status is restricted",
+            400
+          )
+        );
       }
       order_res = await Order.findOneAndUpdate(
         { _id: order_id },
@@ -221,22 +235,41 @@ exports.updateOrderStaus = catchAsyncError(async (req, res, next) => {
       );
       break;
     }
-    case ('delivered'): {
+    case "delivered": {
       /* Preventing updating duplicate status */
-      if(order?.order_status === 'delivered') {
-        return next(new ErrorHandler(`Current order status is already in ${order?.order_status} state`, 400));
+      if (order?.order_status === "delivered") {
+        return next(
+          new ErrorHandler(
+            `Current order status is already in ${order?.order_status} state`,
+            400
+          )
+        );
       }
       /* Preventing updating to previous status */
-      if (order?.order_status === 'canceled') {
-        return next(new ErrorHandler("Updating order status to previous state is restricted", 400));
+      if (order?.order_status === "canceled") {
+        return next(
+          new ErrorHandler(
+            "Updating order status to previous state is restricted",
+            400
+          )
+        );
       }
       await Promise.all(
         order?.order_items?.map(async (product) => {
           const found_product = await Product.findById(product.product_id);
-          if (found_product && !found_product.verified_purchase_users.some(user => user.user_id === order.user_id)) {
+          if (
+            found_product &&
+            !found_product.verified_purchase_users.some(
+              (user) => user.user_id === order.user_id
+            )
+          ) {
             await Product.findOneAndUpdate(
               { _id: product.product_id },
-              { $addToSet: { verified_purchase_users: { order_id, user_id: order.user_id } } }
+              {
+                $addToSet: {
+                  verified_purchase_users: { order_id, user_id: order.user_id },
+                },
+              }
             );
           }
         })
@@ -256,7 +289,7 @@ exports.updateOrderStaus = catchAsyncError(async (req, res, next) => {
     success: true,
     order: order_res,
   });
-})
+});
 // get order - /api/v1/order/:id
 exports.getOrder = catchAsyncError(async (req, res, next) => {
   const order_id = req.params.id;
@@ -278,7 +311,7 @@ exports.getOrders = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("User not found with this id", 404));
   }
 
-  const orders = await Order.find({ user_id }).sort({ createdAt: 'desc' });
+  const orders = await Order.find({ user_id }).sort({ createdAt: "desc" });
 
   res.status(200).json({
     success: true,
@@ -288,7 +321,7 @@ exports.getOrders = catchAsyncError(async (req, res, next) => {
 
 // get orders all - /api/v1/orders-all
 exports.getOrdersAll = catchAsyncError(async (req, res, next) => {
-  const orders_all = await Order.find().sort({ createdAt: 'desc' });
+  const orders_all = await Order.find().sort({ createdAt: "desc" });
   res.status(200).json({
     success: true,
     orders_all,
