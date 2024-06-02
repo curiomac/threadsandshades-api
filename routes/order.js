@@ -10,6 +10,7 @@ const {
   getOrders,
   updateOrderStaus,
   getOrdersAll,
+  printOrder,
 } = require("../controllers/orderController");
 
 router
@@ -33,5 +34,10 @@ router
   .get(
     // isAuthenticatedUser, authorizeRoles("user", "admin"),
      getOrders);
+router
+  .route("/print-invoice/:id")
+  .get(
+    // isAuthenticatedUser, authorizeRoles("user", "admin"),
+    printOrder);
 
 module.exports = router;

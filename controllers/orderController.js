@@ -9,6 +9,11 @@ const readHTMLTemplate = require("../utils/readHTMLTemplate");
 const path = require("path");
 const sendEmail = require("../utils/email");
 const moment = require("moment");
+const fs = require("fs");
+const puppeteer = require("puppeteer");
+const handlebars = require("handlebars");
+// const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
+
 // create order - /api/v1/order/create
 exports.createOrder = catchAsyncError(async (req, res, next) => {
   const order_data = req.body;
@@ -17,10 +22,11 @@ exports.createOrder = catchAsyncError(async (req, res, next) => {
   if (!user_found) {
     return next(new ErrorHandler("User not found", 404));
   }
+  const today = new Date();
   const email = user_found?.email;
   let products = [];
   const order_items = await Promise.all(
-    order_data?.products?.map(async (product) => {
+    order_data?.product_ids?.map(async (product) => {
       const found_product = await Product.findById(product.product_id);
       products = [...products, { ...found_product._doc }];
       return {
@@ -83,7 +89,10 @@ exports.createOrder = catchAsyncError(async (req, res, next) => {
     payment_status: "pending",
     billing_address: order_data?.billing_address,
     shipping_address_id: address_data?._id,
-    expected_delivery_date: "15-03-2024",
+    expected_delivery_date:
+      order_data?.billing_address?.state === "Tamil Nadu"
+        ? new Date(today.setDate(today.getDate() + 2))
+        : new Date(today.setDate(today.getDate() + 4)),
     order_summary: order_data?.order_summary,
     additional_notes: order_data?.additional_notes
       ? order_data?.additional_notes
@@ -294,6 +303,7 @@ exports.updateOrderStaus = catchAsyncError(async (req, res, next) => {
 exports.getOrder = catchAsyncError(async (req, res, next) => {
   const order_id = req.params.id;
   const order = await Order.findById(order_id);
+  console.log("order: ", order);
   if (!order) {
     return next(new ErrorHandler("Order not found with this id", 404));
   }
@@ -326,4 +336,73 @@ exports.getOrdersAll = catchAsyncError(async (req, res, next) => {
     success: true,
     orders_all,
   });
+});
+
+// Helper function to compile HTML template
+const compileTemplate = (templatePath, data) => {
+  const template = fs.readFileSync(templatePath, "utf-8");
+  const compiledTemplate = handlebars.compile(template);
+  return compiledTemplate(data);
+};
+// Print order - /api/v1/print-invoice/:id
+exports.printOrder = catchAsyncError(async (req, res, next) => {
+  const order_id = req.params.id;
+  const orderDetails = await Order.findById(order_id);
+  console.log("order: ", orderDetails);
+  if (!orderDetails) {
+    return next(new ErrorHandler("Order not found with this id", 404));
+  }
+  const getCurrencyFormat = (price) => {
+    const formatter = new Intl.NumberFormat("en-US", {
+      currency: "INR",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+    return formatter.format(price);
+  };
+  const formatedOrderItems = orderDetails.order_items.map((data) => {
+    return {
+      product_title: data.product_title,
+      fixed_price: getCurrencyFormat(data.fixed_price),
+      selected_quantity: data.selected_quantity,
+      product_act_price: getCurrencyFormat(
+        data.fixed_price * data.selected_quantity
+      ),
+      product_image: data.product_images[0],
+    };
+  });
+  const orderData = {
+    order_id: orderDetails._id,
+    user_id: orderDetails.user_id,
+    order_date: orderDetails.createdAt,
+    order_items: formatedOrderItems,
+    total_mrp: getCurrencyFormat(orderDetails.order_summary.total_mrp),
+    shipping_charge: getCurrencyFormat(orderDetails.order_summary.shipping_charge),
+    cart_total: getCurrencyFormat(orderDetails.order_summary.cart_total),
+  };
+
+  const htmlContent = compileTemplate(
+    path.join(__dirname, "..", "ui/html/invoiceTemplate.html"),
+    orderData
+  );
+
+  try {
+    const browser = await puppeteer.launch({
+      headless: true,
+      timeout: 60000,
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    });
+    const page = await browser.newPage();
+    await page.setContent(htmlContent, { waitUntil: "networkidle0" });
+    const pdfBuffer = await page.pdf({ format: "A4" });
+    await browser.close();
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", "attachment; filename=invoice.pdf");
+    res.send(pdfBuffer);
+  } catch (error) {
+    return next(
+      new ErrorHandler(`Failed to generate PDF: ${error.message}`, 500)
+    );
+  }
 });
