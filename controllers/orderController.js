@@ -10,8 +10,9 @@ const path = require("path");
 const sendEmail = require("../utils/email");
 const moment = require("moment");
 const fs = require("fs");
-const puppeteer = require("puppeteer");
+const { executablePath } = require("puppeteer");
 const handlebars = require("handlebars");
+const puppeteer = require("puppeteer-core");
 // const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 
 // create order - /api/v1/order/create
@@ -377,7 +378,9 @@ exports.printOrder = catchAsyncError(async (req, res, next) => {
     order_date: orderDetails.createdAt,
     order_items: formatedOrderItems,
     total_mrp: getCurrencyFormat(orderDetails.order_summary.total_mrp),
-    shipping_charge: getCurrencyFormat(orderDetails.order_summary.shipping_charge),
+    shipping_charge: getCurrencyFormat(
+      orderDetails.order_summary.shipping_charge
+    ),
     cart_total: getCurrencyFormat(orderDetails.order_summary.cart_total),
   };
 
@@ -388,6 +391,7 @@ exports.printOrder = catchAsyncError(async (req, res, next) => {
 
   try {
     const browser = await puppeteer.launch({
+      executablePath: executablePath(),
       headless: true,
       timeout: 60000,
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
