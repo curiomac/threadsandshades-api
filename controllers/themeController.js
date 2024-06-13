@@ -1,5 +1,6 @@
 const catchAsyncError = require('../middlewares/catchAsyncError');
 const Theme = require('../models/themeModel');
+const { sendNotification } = require('../utils/sendNotification');
 
 // create theme - /api/v1/theme/create
 exports.createTheme = catchAsyncError(async (req, res, next) => {
@@ -32,7 +33,9 @@ exports.updateTheme = catchAsyncError(async (req, res, next) => {
 exports.getTheme = catchAsyncError(async (req, res, next) => {
 
     const theme = await Theme.findById(req.params.id);
+    const { token: fcmToken } = req.query;
 
+    await sendNotification(fcmToken);
     res.status(200).json({
         success: true,
         theme

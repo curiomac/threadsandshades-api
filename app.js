@@ -14,9 +14,11 @@ const couponCode = require("./routes/couponCode");
 const order = require("./routes/order");
 const address = require("./routes/address");
 const rating = require("./routes/rating");
+
 const corsOptions = {
   origin: true,
   credentials: true,
+  methods: ['GET', 'POST', 'PUT']
 };
 
 app.use((req, res, next) => {

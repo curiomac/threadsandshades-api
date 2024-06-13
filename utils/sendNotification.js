@@ -1,0 +1,40 @@
+const { GoogleAuth } = require('google-auth-library');
+const path = require('path');
+const axios = require('axios');
+
+const serviceAccountPath = path.join(__dirname, '..', 'threadsandshades-2023-firebase-adminsdk-j7aqy-d811e076a8.json');
+
+async function sendNotification(fcmToken) {
+    const auth = new GoogleAuth({
+        keyFile: serviceAccountPath,
+        scopes: ['https://www.googleapis.com/auth/firebase.messaging'],
+    });
+    const accessToken = await auth.getAccessToken();
+    console.log("accessToken: ", accessToken);
+    console.log("serviceAccountPath: ", serviceAccountPath);
+    const message = {
+        message: {
+            token: fcmToken,
+            notification: {
+                title: 'Hello',
+                body: 'This is a test notification',
+            },
+        },
+    };
+
+    try {
+        const response = await axios.post('https://fcm.googleapis.com/v1/projects/threadsandshades-2023/messages:send', message, {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
+            },
+        });
+        console.log('Notification sent successfully:', response.data);
+    } catch (error) {
+        console.error('Error sending notification:', error.response.data);
+    }
+}
+
+module.exports = {
+    sendNotification
+};
