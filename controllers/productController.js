@@ -72,13 +72,13 @@ exports.getProducts = catchAsyncError(async (req, res, next) => {
       ) {
         update_product = await Product.findByIdAndUpdate(
           item._id,
-          { $set: { is_discounted_product: true } },
+          { $set: { is_discounted_product: true, fixed_price: item.sale_price - item.discount_price } },
           { new: true }
         );
       } else {
         update_product = await Product.findByIdAndUpdate(
           item._id,
-          { $set: { is_discounted_product: false } },
+          { $set: { is_discounted_product: false, fixed_price: item.sale_price } },
           { new: true }
         );
       }
