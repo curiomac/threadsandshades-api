@@ -8,6 +8,7 @@ const {
   createTheme,
   updateTheme,
   getTheme,
+  getEntryNotification,
 } = require("../controllers/themeController");
 
 router
@@ -17,5 +18,6 @@ router
   .route("/theme/update/:id")
   .put(isAuthenticatedUser, authorizeRoles("manager"), updateTheme);
 router.route("/theme/get/:id").get(getTheme);
+router.route("/enrty/notification/get").get(getEntryNotification);
 
 module.exports = router;

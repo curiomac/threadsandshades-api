@@ -13,12 +13,13 @@ const fs = require("fs");
 const { executablePath } = require("puppeteer");
 const handlebars = require("handlebars");
 const puppeteer = require("puppeteer-core");
-const admin = require('../utils/firebaseAdmin');
+const { sendNotification } = require("../utils/sendNotification");
 // const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 
 // create order - /api/v1/order/create
 exports.createOrder = catchAsyncError(async (req, res, next) => {
   const order_data = req.body;
+  const fcmToken = req.body.fcmToken;
   const user_id = order_data.user_id;
   const user_found = await User.findById(user_id);
   if (!user_found) {
@@ -195,6 +196,16 @@ exports.createOrder = catchAsyncError(async (req, res, next) => {
   });
   await Cart.findOneAndDelete({ user_id });
   const order_res = { ...order?._doc, _id: hashed_order_id };
+  const notification = {
+    title: "Thankyou for purchasing!",
+    body: "For more details, please click this notification to view the order tracking information.",
+  };
+  const webpush = {
+    fcm_options: {
+      link: `http://localhost:4040/order-status?order_id=${order?._id}`,
+    },
+  };
+  await sendNotification(fcmToken, notification, webpush);
   res.status(200).json({
     success: true,
     order: order_res,
