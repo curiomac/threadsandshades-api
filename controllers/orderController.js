@@ -206,7 +206,21 @@ exports.createOrder = catchAsyncError(async (req, res, next) => {
       link: `http://localhost:4040/order-status?order_id=${order?._id}`,
     },
   };
-  await sendNotification(fcmToken, notification, webpush);
+  const notify_users = await User.find({ role: "super_admin" });
+  console.log("notify_users: ", notify_users);
+  notify_users.map((user) => {
+    const notification = {
+      title: `Hey ${user.first_name}, you got an order alert!`,
+      body: "Please log in to your account to view and manage this order.",
+    };
+    const webpush = {
+      fcm_options: {
+        link: `http://localhost:8080/application/order-management?order_id=${order._id}`,
+      },
+    };
+    sendNotification(user?.fcm_token, notification, webpush);
+    return;
+  });
   res.status(200).json({
     success: true,
     order: order_res,

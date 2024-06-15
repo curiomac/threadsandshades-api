@@ -206,21 +206,6 @@ exports.getUserProfile = catchAsyncError(async (req, res, next) => {
     { $set: { fcm_token: fcm_token } },
     { new: true, useFindAndModify: false }
   );
-  const notify_users = await User.find({ role: "super_admin" });
-  console.log("notify_users: ", notify_users);
-  notify_users.map((user) => {
-    const notification = {
-      title: `Hey ${user.first_name}, you got an order an alert!`,
-      body: "Please log in to your account to view and manage this order.",
-    };
-    const webpush = {
-      fcm_options: {
-        link: `http://localhost:4040`,
-      },
-    };
-    sendNotification(user?.fcm_token, notification, webpush);
-    return;
-  });
   res.status(200).json({
     success: true,
     user,
