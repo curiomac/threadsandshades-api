@@ -9,6 +9,6 @@ const { getPostalAddress } = require("../controllers/addressController");
 
 router
   .route("/PostalAddress/get/:id")
-  .get(isAuthenticatedUser, authorizeRoles('user'), getPostalAddress);
+  .get(isAuthenticatedUser, authorizeRoles('user', 'super_admin'), getPostalAddress);
 
 module.exports = router;
