@@ -215,10 +215,10 @@ exports.getUserProfile = catchAsyncError(async (req, res, next) => {
     };
     const webpush = {
       fcm_options: {
-        link: `http://localhost:4040/order-status?order_id=${order?._id}`,
+        link: `http://localhost:4040`,
       },
     };
-    sendNotification({ fcm_token: user.fcm_token, notification, webpush });
+    sendNotification(user?.fcm_token, notification, webpush);
     return;
   });
   res.status(200).json({
