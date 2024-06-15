@@ -14,6 +14,7 @@ const { executablePath } = require("puppeteer");
 const handlebars = require("handlebars");
 const puppeteer = require("puppeteer-core");
 const { sendNotification } = require("../utils/sendNotification");
+const APIFeatures = require("../utils/apiFeatures");
 // const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 
 // create order - /api/v1/order/create
@@ -344,10 +345,28 @@ exports.getOrders = catchAsyncError(async (req, res, next) => {
 
 // get orders all - /api/v1/orders-all
 exports.getOrdersAll = catchAsyncError(async (req, res, next) => {
-  const orders_all = await Order.find().sort({ createdAt: "desc" });
+  const resPerPage = req.query.limit;
+  let buildQuery = () => {
+    return new APIFeatures(Order.find(), req.query).search().filter();
+  };
+  const filteredOrderCount = await buildQuery().query.countDocuments({});
+  const totalOrdersCount = await Order.countDocuments({});
+  let ordersCount = totalOrdersCount;
+  if (filteredOrderCount !== totalOrdersCount) {
+    ordersCount = filteredOrderCount;
+  }
+  const currentPage = parseInt(req.query.page);
+  const totalPages =
+    Math.ceil(ordersCount / resPerPage) > 0
+      ? Math.ceil(ordersCount / resPerPage)
+      : 1;
+  const orders = await buildQuery().paginate(resPerPage).query;
+  // const orders_all = await Order.find().sort({ createdAt: "desc" });
   res.status(200).json({
     success: true,
-    orders_all,
+    orders_all: orders,
+    currentPage,
+    totalPages
   });
 });
 

@@ -49,7 +49,11 @@ exports.getEntryNotification = catchAsyncError(async (req, res, next) => {
       link: "http://localhost:4040/",
     },
   };
-  await sendNotification(fcmToken, notification, webpush);
+
+  const callBackFunc = (e) => {
+    console.log("CALL: ", e.message.notification);
+  };
+  await sendNotification(fcmToken, notification, webpush, callBackFunc);
   res.status(200).json({
     success: true,
   });

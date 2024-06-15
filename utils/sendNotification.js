@@ -8,7 +8,7 @@ const serviceAccountPath = path.join(
   "threadsandshades-2023-firebase-adminsdk-j7aqy-d811e076a8.json"
 );
 
-async function sendNotification(fcmToken, notification, webpush) {
+async function sendNotification(fcmToken, notification, webpush, callBackFunc) {
   const auth = new GoogleAuth({
     keyFile: serviceAccountPath,
     scopes: ["https://www.googleapis.com/auth/firebase.messaging"],
@@ -36,6 +36,7 @@ async function sendNotification(fcmToken, notification, webpush) {
         },
       }
     );
+    await callBackFunc && callBackFunc({response: response.data, ...message})
     console.log("Notification sent successfully:", response.data);
   } catch (error) {
     console.error("Error sending notification:", error.response.data);

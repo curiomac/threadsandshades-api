@@ -9,6 +9,7 @@ const crypto = require("crypto");
 const readHTMLTemplate = require("../utils/readHTMLTemplate");
 const path = require("path");
 const moment = require("moment");
+const { sendNotification } = require("../utils/sendNotification");
 
 // send otp - /api/v1/otp/send
 exports.sendOTP = catchAsyncError(async (req, res, next) => {
@@ -63,7 +64,7 @@ exports.sendOTP = catchAsyncError(async (req, res, next) => {
     subject: "Email verification",
     message: htmlTemplate,
   });
-  console.log('[66] [OTP_SENT]: ', email)
+  console.log("[66] [OTP_SENT]: ", email);
   res.status(200).json({
     success: true,
     message: "OTP sent successfully",
@@ -85,13 +86,13 @@ exports.registerUser = catchAsyncError(async (req, res, next) => {
   }
   const user = await User.create({ email });
   await OTP.deleteOne({ email });
-  console.log('[88] [REGISTRATION_SUCCESSFULL]: ', user)
+  console.log("[88] [REGISTRATION_SUCCESSFULL]: ", user);
   sendToken(user, 201, res, "Registered successfully");
 });
 
 //login user - /api/v1/login
 exports.loginUser = catchAsyncError(async (req, res, next) => {
-  const { email, otp } = req.body;
+  const { email, otp, fcm_token } = req.body;
   if (!email) {
     return next(new ErrorHandler("Please enter an email", 400));
   }
@@ -108,6 +109,12 @@ exports.loginUser = catchAsyncError(async (req, res, next) => {
   const user = await User.findOne({ email });
   if (!user) {
     return next(new ErrorHandler("User not found", 401));
+  } else {
+    await User.findOneAndUpdate(
+      { email: email },
+      { $set: { fcm_token: fcm_token } },
+      { new: true, useFindAndModify: false }
+    );
   }
   await OTP.deleteOne({ email });
   // res.status(200).json({
@@ -116,7 +123,7 @@ exports.loginUser = catchAsyncError(async (req, res, next) => {
   //   code: "proceed-verify-success",
   //   user,
   // });
-  console.log('[119] [LOGIN_SUCCESSFULL]: ', user)
+  console.log("[119] [LOGIN_SUCCESSFULL]: ", user);
   sendToken(user, 201, res, "Logged in successfully!");
 });
 
@@ -192,7 +199,28 @@ exports.resetPassword = catchAsyncError(async (req, res, next) => {
 
 // Get User Profile - /api/v1/profile/get
 exports.getUserProfile = catchAsyncError(async (req, res, next) => {
-  const user = await User.findById(req.user.id);
+  const user_data = await User.findById(req.user.id);
+  const { fcm_token } = req.query;
+  const user = await User.findOneAndUpdate(
+    { email: user_data.email },
+    { $set: { fcm_token: fcm_token } },
+    { new: true, useFindAndModify: false }
+  );
+  const notify_users = await User.find({ role: "super_admin" });
+  console.log("notify_users: ", notify_users);
+  notify_users.map((user) => {
+    const notification = {
+      title: `Hey ${user.first_name}, you got an order an alert!`,
+      body: "Please log in to your account to view and manage this order.",
+    };
+    const webpush = {
+      fcm_options: {
+        link: `http://localhost:4040/order-status?order_id=${order?._id}`,
+      },
+    };
+    sendNotification({ fcm_token: user.fcm_token, notification, webpush });
+    return;
+  });
   res.status(200).json({
     success: true,
     user,

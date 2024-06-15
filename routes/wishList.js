@@ -13,13 +13,13 @@ const {
 
 router
   .route("/wishlist/move")
-  .post(isAuthenticatedUser, authorizeRoles("user"), moveWishList);
+  .post(isAuthenticatedUser, authorizeRoles("user", "super_admin"), moveWishList);
 router
   .route("/wishlist/update")
-  .post(isAuthenticatedUser, authorizeRoles("user"), updateWishlist);
+  .post(isAuthenticatedUser, authorizeRoles("user", "super_admin"), updateWishlist);
 router
   .route("/wishlist/:id")
-  .get(isAuthenticatedUser, authorizeRoles("user"), getWishListItems);
+  .get(isAuthenticatedUser, authorizeRoles("user", "super_admin"), getWishListItems);
 router.route("/temp/wishlist").post(getTemporaryWishListItems);
 
 module.exports = router;

@@ -15,15 +15,15 @@ const {
 
 router
   .route("/order/create")
-  .post(isAuthenticatedUser, authorizeRoles("user"), createOrder);
+  .post(isAuthenticatedUser, authorizeRoles("user", "super_admin"), createOrder);
 router
   .route("/order-status/update")
   .put(
-    // isAuthenticatedUser, authorizeRoles("user"),
+    // isAuthenticatedUser, authorizeRoles("user", "super_admin"),
      updateOrderStaus);
 router
   .route("/order/:id")
-  .get(isAuthenticatedUser, authorizeRoles("user"), getOrder);
+  .get(isAuthenticatedUser, authorizeRoles("user", "super_admin"), getOrder);
 router
   .route("/orders-all")
   .get(

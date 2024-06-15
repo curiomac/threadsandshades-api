@@ -42,21 +42,21 @@ router.route("/password/forgot").post(forgotPassword);
 router.route("/password/reset/:token").post(resetPassword);
 router
   .route("/profile/get")
-  .get(isAuthenticatedUser, authorizeRoles("user"), getUserProfile);
+  .get(isAuthenticatedUser, authorizeRoles("user", "super_admin"), getUserProfile);
 router
   .route("/profile/image/get")
-  .get(isAuthenticatedUser, authorizeRoles("user"), getUserProfileImage);
+  .get(isAuthenticatedUser, authorizeRoles("user", "super_admin"), getUserProfileImage);
 router
   .route("/password/change")
-  .put(isAuthenticatedUser, authorizeRoles("user"), changePassword);
+  .put(isAuthenticatedUser, authorizeRoles("user", "super_admin"), changePassword);
 router
   .route("/profile/update/:id")
-  .put(isAuthenticatedUser, authorizeRoles("user"), updateProfile);
+  .put(isAuthenticatedUser, authorizeRoles("user", "super_admin"), updateProfile);
 router
   .route("/profile/image/update/:id")
   .put(
     isAuthenticatedUser,
-    authorizeRoles("user"),
+    authorizeRoles("user", "super_admin"),
     upload.single("avatar"),
     updateProfileImage
   );

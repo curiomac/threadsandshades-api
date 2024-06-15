@@ -11,7 +11,7 @@ const {
 
 router
   .route("/checkoutdetails/:id")
-  .get(isAuthenticatedUser, authorizeRoles("user"), getCheckoutDetails);
+  .get(isAuthenticatedUser, authorizeRoles("user", "super_admin"), getCheckoutDetails);
 router.route("/temp/checkoutdetails").post(getTempCheckoutDetails);
 
 module.exports = router;

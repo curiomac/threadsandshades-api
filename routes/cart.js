@@ -14,16 +14,16 @@ const {
 
 router
   .route("/cart/add")
-  .post(isAuthenticatedUser, authorizeRoles("user"), addCart);
+  .post(isAuthenticatedUser, authorizeRoles("user", "super_admin"), addCart);
 router
   .route("/cart/update")
-  .post(isAuthenticatedUser, authorizeRoles("user"), updateCart);
+  .post(isAuthenticatedUser, authorizeRoles("user", "super_admin"), updateCart);
 router
   .route("/cart/:id")
-  .get(isAuthenticatedUser, authorizeRoles("user"), getCartItems);
+  .get(isAuthenticatedUser, authorizeRoles("user", "super_admin"), getCartItems);
 router.route("/temp/cart").post(getTemporaryCartItems);
 router
   .route("/cart/remove")
-  .post(isAuthenticatedUser, authorizeRoles("user"), removeCart);
+  .post(isAuthenticatedUser, authorizeRoles("user", "super_admin"), removeCart);
 
 module.exports = router;
