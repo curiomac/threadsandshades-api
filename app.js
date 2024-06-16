@@ -14,6 +14,7 @@ const couponCode = require("./routes/couponCode");
 const order = require("./routes/order");
 const address = require("./routes/address");
 const rating = require("./routes/rating");
+const notification = require("./routes/notification");
 
 const corsOptions = {
   origin: true,
@@ -42,6 +43,7 @@ app.use("/api/v1/", couponCode);
 app.use("/api/v1/", order);
 app.use("/api/v1/", address);
 app.use("/api/v1/", rating);
+app.use("/api/v1/", notification);
 
 app.use(errorMiddleware);
 

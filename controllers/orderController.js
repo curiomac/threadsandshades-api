@@ -15,6 +15,7 @@ const handlebars = require("handlebars");
 const puppeteer = require("puppeteer-core");
 const { sendNotification } = require("../utils/sendNotification");
 const APIFeatures = require("../utils/apiFeatures");
+const Notification = require("../models/notificationModel");
 // const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 
 // create order - /api/v1/order/create
@@ -197,28 +198,36 @@ exports.createOrder = catchAsyncError(async (req, res, next) => {
   });
   await Cart.findOneAndDelete({ user_id });
   const order_res = { ...order?._doc, _id: hashed_order_id };
-  const notification = {
-    title: "Thankyou for purchasing!",
-    body: "For more details, please click this notification to view the order tracking information.",
-  };
-  const webpush = {
-    fcm_options: {
-      link: `http://localhost:4040/order-status?order_id=${order?._id}`,
-    },
-  };
   const notify_users = await User.find({ role: "super_admin" });
   console.log("notify_users: ", notify_users);
-  notify_users.map((user) => {
-    const notification = {
-      title: `Hey ${user.first_name}, you got an order alert!`,
-      body: "Please log in to your account to view and manage this order.",
-    };
-    const webpush = {
-      fcm_options: {
-        link: `http://localhost:8080/application/order-management?order_id=${order._id}`,
-      },
-    };
-    sendNotification(user?.fcm_token, notification, webpush);
+  notify_users.map(async (user) => {
+    try {
+      const notification = {
+        title: `Hey ${user.first_name}, you got an order alert!`,
+        body: "Please log in to your account to view and manage this order.",
+      };
+
+      const webpush = {
+        fcm_options: {
+          link: `http://localhost:8080/application/order-management?order_id=${order._id}`,
+        },
+      };
+
+      const payload = {
+        user_id: user._id,
+        content: {
+          notification,
+          webpush,
+        },
+      };
+
+      const notificationCreated = await Notification.create(payload);
+      console.log("notificationCreated: ", notificationCreated);
+
+      await sendNotification(user?.fcm_token, notification, webpush);
+    } catch (error) {
+      console.error("Error sending notification: ", error);
+    }
     return;
   });
   res.status(200).json({
@@ -380,7 +389,7 @@ exports.getOrdersAll = catchAsyncError(async (req, res, next) => {
     success: true,
     orders_all: orders,
     currentPage,
-    totalPages
+    totalPages,
   });
 });
 
